@@ -102,12 +102,6 @@ export default function Topbar() {
                       type="urgent"
                     />
                     <NotificationItem 
-                      title="Allocation completed"
-                      message="50 students allocated to rooms"
-                      time="1 hour ago"
-                      type="success"
-                    />
-                    <NotificationItem 
                       title="System maintenance"
                       message="Scheduled for tonight 2:00 AM"
                       time="3 hours ago"
