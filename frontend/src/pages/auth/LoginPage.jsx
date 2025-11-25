@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -25,9 +26,7 @@ export default function LoginPage() {
           ? await loginAdmin(payload)
           : await loginStudent(payload);
 
-      // expecting { token, user: { id, name, role } }
       login(data.user, data.token);
-
       navigate(role === ROLES.ADMIN ? "/admin" : "/student");
     } catch (err) {
       setError(err.message || "Login failed");
@@ -37,84 +36,141 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-950/90 shadow-2xl shadow-slate-950/70 p-7">
-        <h1 className="text-2xl font-semibold text-slate-50 text-center mb-1">
-          Welcome back
-        </h1>
-        <p className="text-xs text-slate-400 text-center mb-6">
-          Smart Hostel Allocation & Complaint SLA Dashboard
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl" />
+      </div>
 
-        <div className="flex mb-5 bg-slate-900/80 rounded-xl p-1">
-          <button
-            type="button"
-            onClick={() => setRole(ROLES.STUDENT)}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition ${
-              role === ROLES.STUDENT
-                ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/40"
-                : "text-slate-300 hover:bg-slate-800/80"
-            }`}
-          >
-            Student
-          </button>
-          <button
-            type="button"
-            onClick={() => setRole(ROLES.ADMIN)}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition ${
-              role === ROLES.ADMIN
-                ? "bg-fuchsia-600 text-white shadow-sm shadow-fuchsia-500/40"
-                : "text-slate-300 hover:bg-slate-800/80"
-            }`}
-          >
-            Admin
-          </button>
+      {/* Login Card */}
+      <div className="relative w-full max-w-md">
+        <div className="rounded-3xl border border-slate-800/50 bg-slate-950/90 backdrop-blur-xl shadow-2xl shadow-slate-950/50 p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <span className="text-2xl font-bold text-white">H</span>
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
+            <p className="text-sm text-slate-400">
+              Smart Hostel Management System
+            </p>
+          </div>
+
+          {/* Role Selector */}
+          <div className="flex mb-6 bg-slate-900/80 rounded-2xl p-1">
+            <button
+              type="button"
+              onClick={() => setRole(ROLES.STUDENT)}
+              className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
+                role === ROLES.STUDENT
+                  ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-500/25"
+                  : "text-slate-300 hover:bg-slate-800/50"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span>🎓</span>
+                Student
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole(ROLES.ADMIN)}
+              className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
+                role === ROLES.ADMIN
+                  ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/25"
+                  : "text-slate-300 hover:bg-slate-800/50"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span>👨‍💼</span>
+                Admin
+              </div>
+            </button>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-slate-700/50 bg-slate-900/50 px-4 py-3 text-sm text-slate-50 placeholder:text-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-all"
+                />
+                <span className="absolute right-3 top-3 text-slate-400">📧</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-slate-700/50 bg-slate-900/50 px-4 py-3 text-sm text-slate-50 placeholder:text-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-300"
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+                <p className="text-sm text-red-400 flex items-center gap-2">
+                  <span>⚠️</span>
+                  {error}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Signing in...
+                </div>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
+
+
+
+          {/* Footer */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-slate-500">
+              Don't have an account?{" "}
+              <button
+                onClick={() => navigate("/register")}
+                className="text-indigo-400 hover:text-indigo-300 font-medium"
+              >
+                Register here
+              </button>
+            </p>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-slate-200 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 placeholder:text-slate-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-200 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 placeholder:text-slate-500"
-            />
-          </div>
-
-          {error && (
-            <p className="text-xs font-medium text-rose-400">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-1 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-500/40 transition hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
-
-        <p className="mt-4 text-center text-[11px] text-slate-500">
-          For demo, use seeded student/admin accounts.
-        </p>
       </div>
     </div>
   );
