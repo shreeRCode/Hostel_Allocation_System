@@ -9,83 +9,85 @@ datasource db {
 }
 
 model Student {
-  id               Int          @id @default(autoincrement())
-  name             String
-  branch           String
-  year             Int
-  gender           String
-  disciplineScore  Int?
-  preferences      String?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id              Int      @id @default(autoincrement())
+  name            String
+  branch          String
+  year            Int
+  gender          String
+  disciplineScore Int?
+  preferences     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  allocations      Allocation[]
-  complaints       Complaint[]
+  allocations Allocation[]
+  complaints  Complaint[]
 }
 
 model Hostel {
-  id             Int          @id @default(autoincrement())
-  name           String
-  genderAllowed  String
-  capacity       Int
-  distance       Int
-  createdAt      DateTime     @default(now())
+  id            Int      @id @default(autoincrement())
+  name          String
+  genderAllowed String
+  capacity      Int
+  distance      Int
+  createdAt     DateTime @default(now())
 
-  rooms          Room[]
-  complaints     Complaint[]
+  rooms      Room[]
+  complaints Complaint[]
 }
 
 model Room {
-  id               Int          @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   hostelId         Int
   roomNumber       String
   capacity         Int
-  currentOccupancy Int          @default(0)
-  createdAt        DateTime     @default(now())
+  currentOccupancy Int      @default(0)
+  createdAt        DateTime @default(now())
 
-  hostel           Hostel       @relation(fields: [hostelId], references: [id])
-  allocations      Allocation[]
-  complaints       Complaint[]
+  hostel      Hostel       @relation(fields: [hostelId], references: [id])
+  allocations Allocation[]
+  complaints  Complaint[]
+
+  @@unique([hostelId, roomNumber])
 }
 
 model Allocation {
-  id          Int        @id @default(autoincrement())
-  allocatedAt DateTime   @default(now())
+  id          Int      @id @default(autoincrement())
+  allocatedAt DateTime @default(now())
   studentId   Int
   roomId      Int
-  active      Boolean    @default(true)
+  active      Boolean  @default(true)
 
-  student     Student    @relation(fields: [studentId], references: [id])
-  room        Room       @relation(fields: [roomId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+  room    Room    @relation(fields: [roomId], references: [id])
 
   @@index([roomId])
   @@index([studentId])
 }
 
 model Complaint {
-  id          Int        @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   issueType   String
   description String?
   severity    Severity
-  status      Status     @default(PENDING)
-  createdAt   DateTime   @default(now())
+  status      Status   @default(PENDING)
+  createdAt   DateTime @default(now())
 
-  studentId   Int
-  hostelId    Int
-  roomId      Int?
+  studentId Int
+  hostelId  Int
+  roomId    Int?
 
-  student     Student    @relation(fields: [studentId], references: [id])
-  hostel      Hostel     @relation(fields: [hostelId], references: [id])
-  room        Room?      @relation(fields: [roomId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+  hostel  Hostel  @relation(fields: [hostelId], references: [id])
+  room    Room?   @relation(fields: [roomId], references: [id])
 }
 
 model Admin {
-  id        Int        @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  email     String     @unique
+  email     String    @unique
   password  String
-  role      AdminRole  @default(WARDEN)
-  createdAt DateTime   @default(now())
+  role      AdminRole @default(WARDEN)
+  createdAt DateTime  @default(now())
 }
 
 enum Severity {
