@@ -21,14 +21,18 @@ export default function LoginPage() {
 
     try {
       const payload = { email, password };
+      console.log('Login attempt:', { role, email, payload });
+      
       const data =
         role === ROLES.ADMIN
           ? await loginAdmin(payload)
           : await loginStudent(payload);
 
+      console.log('Login response:', data);
       login(data.user, data.token);
       navigate(role === ROLES.ADMIN ? "/admin" : "/student");
     } catch (err) {
+      console.error('Login error:', err);
       setError(err.message || "Login failed");
     } finally {
       setLoading(false);

@@ -1,0 +1,653 @@
+openapi: 3.0.0
+info:
+  title: Smart Hostel Management System API
+  description: Complete API documentation for the Hostel Allocation System
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@hostelsystem.com
+
+servers:
+  - url: http://localhost:8080/api
+    description: Development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        role:
+          type: string
+          enum: [STUDENT, ADMIN]
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - branch
+        - year
+        - gender
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        branch:
+          type: string
+        year:
+          type: integer
+        gender:
+          type: string
+          enum: [MALE, FEMALE]
+
+    Complaint:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        category:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, RESOLVED, ESCALATED, CLOSED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateComplaintRequest:
+      type: object
+      required:
+        - title
+        - priority
+        - category
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        category:
+          type: string
+
+    Allocation:
+      type: object
+      properties:
+        id:
+          type: integer
+        hostelName:
+          type: string
+        roomNumber:
+          type: string
+        occupancy:
+          type: integer
+        capacity:
+          type: integer
+        allocatedAt:
+          type: string
+          format: date-time
+
+    Hostel:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        genderAllowed:
+          type: string
+        capacity:
+          type: integer
+        distance:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    Room:
+      type: object
+      properties:
+        id:
+          type: integer
+        hostelId:
+          type: integer
+        roomNumber:
+          type: string
+        capacity:
+          type: integer
+        currentOccupancy:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    AllocationSummary:
+      type: object
+      properties:
+        message:
+          type: string
+        summary:
+          type: object
+          properties:
+            assigned:
+              type: integer
+            remainingStudents:
+              type: integer
+            remainingRooms:
+              type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+paths:
+  # Authentication Endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Student registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Student login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: "john@student.com"
+              password: "Student@123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: "admin@example.com"
+              password: "Admin@123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Student Endpoints
+  /student/allocation:
+    get:
+      tags:
+        - Student
+      summary: Get student's current allocation
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Allocation details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allocation:
+                    oneOf:
+                      - $ref: '#/components/schemas/Allocation'
+                      - type: 'null'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Complaints Endpoints
+  /complaints/my:
+    get:
+      tags:
+        - Complaints
+      summary: Get student's complaints
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of complaints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  complaints:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Complaint'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /complaints:
+    post:
+      tags:
+        - Complaints
+      summary: Create a new complaint
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateComplaintRequest'
+            example:
+              title: "Water leakage in bathroom"
+              description: "There's a constant water leak from the bathroom ceiling"
+              priority: "HIGH"
+              category: "Plumbing"
+      responses:
+        '201':
+          description: Complaint created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  complaint:
+                    $ref: '#/components/schemas/Complaint'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Admin Endpoints
+  /admin/complaints:
+    get:
+      tags:
+        - Admin
+      summary: Get all complaints (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of all complaints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  complaints:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        studentName:
+                          type: string
+                        hostelName:
+                          type: string
+                        roomNumber:
+                          type: string
+                        issue:
+                          type: string
+                        severity:
+                          type: string
+                        status:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Admin role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/complaints/{id}:
+    put:
+      tags:
+        - Admin
+      summary: Update complaint status (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [PENDING, IN_PROGRESS, RESOLVED, ESCALATED, CLOSED]
+            example:
+              status: "IN_PROGRESS"
+      responses:
+        '200':
+          description: Complaint updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  complaint:
+                    $ref: '#/components/schemas/Complaint'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Admin role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Hostels Endpoints
+  /hostels:
+    get:
+      tags:
+        - Hostels
+      summary: Get all hostels
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of hostels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hostels:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Hostel'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Rooms Endpoints
+  /rooms:
+    get:
+      tags:
+        - Rooms
+      summary: Get rooms (optionally filtered by hostel)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: hostelId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filter rooms by hostel ID
+      responses:
+        '200':
+          description: List of rooms
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rooms:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Room'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Allocation Endpoints
+  /allocation:
+    get:
+      tags:
+        - Allocation
+      summary: Get all allocations (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of allocations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allocations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        student:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            email:
+                              type: string
+                            branch:
+                              type: string
+                            year:
+                              type: integer
+                        room:
+                          type: object
+                          properties:
+                            roomNumber:
+                              type: string
+                            hostel:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                        allocatedAt:
+                          type: string
+                          format: date-time
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Admin role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /allocation/run:
+    post:
+      tags:
+        - Allocation
+      summary: Run allocation algorithm (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Allocation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllocationSummary'
+        '400':
+          description: Allocation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Admin role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Health Check
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  timestamp:
+                    type: string
+                    format: date-time
