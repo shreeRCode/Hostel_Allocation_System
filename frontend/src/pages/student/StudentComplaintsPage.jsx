@@ -5,6 +5,7 @@ import StatusBadge, { PriorityBadge } from "../../components/common/StatusBadge"
 import Table from "../../components/common/Table";
 import Modal from "../../components/common/Modal";
 import { apiRequest } from "../../services/apiClient";
+import { ComplaintsIcon, PlusIcon, ViewIcon, EditIcon, RefreshIcon } from "../../components/common/Icons";
 
 export default function StudentComplaintsPage() {
   const [form, setForm] = useState({
@@ -14,38 +15,7 @@ export default function StudentComplaintsPage() {
     category: ""
   });
   const [submitting, setSubmitting] = useState(false);
-  const [complaints, setComplaints] = useState([
-    {
-      id: 1,
-      title: "Water leakage in bathroom",
-      description: "There's a constant water leak from the bathroom ceiling that started yesterday morning.",
-      priority: "HIGH",
-      category: "Plumbing",
-      status: "IN_PROGRESS",
-      createdAt: "2024-01-14T09:30:00Z",
-      updatedAt: "2024-01-14T15:20:00Z"
-    },
-    {
-      id: 2,
-      title: "WiFi connectivity issues",
-      description: "Internet connection is very slow and frequently disconnects in room A-205.",
-      priority: "MEDIUM",
-      category: "Network",
-      status: "PENDING",
-      createdAt: "2024-01-13T14:20:00Z",
-      updatedAt: "2024-01-13T14:20:00Z"
-    },
-    {
-      id: 3,
-      title: "AC not cooling properly",
-      description: "Air conditioner is running but not providing adequate cooling.",
-      priority: "LOW",
-      category: "HVAC",
-      status: "RESOLVED",
-      createdAt: "2024-01-12T11:15:00Z",
-      updatedAt: "2024-01-13T16:30:00Z"
-    }
-  ]);
+  const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -55,21 +25,22 @@ export default function StudentComplaintsPage() {
     "Security", "Furniture", "Maintenance", "Other"
   ];
 
+  useEffect(() => {
+    fetchComplaints();
+  }, []);
+
   const fetchComplaints = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const data = await apiRequest("/complaints/my", { auth: true });
       setComplaints(data?.complaints ?? []);
-    } catch {
-      // Using mock data for now
+    } catch (error) {
+      console.error('Failed to fetch complaints:', error);
+      // Keep existing complaints on error
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchComplaints();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,30 +50,35 @@ export default function StudentComplaintsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    
     try {
-      await apiRequest("/complaints", {
+      const response = await apiRequest("/complaints", {
         method: "POST",
         body: form,
         auth: true,
       });
       
-      // Add to local state for demo
-      const newComplaint = {
-        id: Date.now(),
-        ...form,
-        status: "PENDING",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      setComplaints(prev => [newComplaint, ...prev]);
+      // Add new complaint to the list
+      if (response.complaint) {
+        setComplaints(prev => [response.complaint, ...prev]);
+      }
       
+      // Reset form and close modal
       setForm({ title: "", description: "", priority: "MEDIUM", category: "" });
       setShowCreateModal(false);
+      
+      // Show success message
+      alert("Complaint submitted successfully!");
+      
     } catch (err) {
-      alert(err.message || "Could not submit complaint");
+      alert(err.message || "Failed to submit complaint");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchComplaints();
   };
 
   const complaintStats = {
@@ -147,9 +123,10 @@ export default function StudentComplaintsPage() {
       render: (_, item) => (
         <button
           onClick={() => setSelectedComplaint(item)}
-          className="text-indigo-400 hover:text-indigo-300 text-sm font-medium"
+          className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors"
         >
-          View Details
+          <ViewIcon className="w-4 h-4" />
+          View
         </button>
       )
     }
@@ -162,19 +139,29 @@ export default function StudentComplaintsPage() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <span className="text-2xl">📝</span>
+              <ComplaintsIcon className="w-8 h-8" />
               My Complaints
             </h1>
             <p className="text-slate-400 mt-1">
               Track and manage your hostel-related issues and requests
             </p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="btn-primary"
-          >
-            ➕ New Complaint
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleRefresh}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              <RefreshIcon className="w-4 h-4" />
+              Refresh
+            </button>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              <PlusIcon className="w-4 h-4" />
+              New Complaint
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -182,38 +169,39 @@ export default function StudentComplaintsPage() {
           <StatsCard
             title="Total"
             value={complaintStats.total}
-            icon={<span className="text-xl">📋</span>}
+            icon={<ComplaintsIcon className="w-5 h-5" />}
           />
           <StatsCard
             title="Pending"
             value={complaintStats.pending}
             trend={complaintStats.pending > 0 ? "down" : "neutral"}
-            icon={<span className="text-xl">⏳</span>}
+            icon={<EditIcon className="w-5 h-5" />}
           />
           <StatsCard
             title="In Progress"
             value={complaintStats.inProgress}
             trend="up"
-            icon={<span className="text-xl">🔄</span>}
+            icon={<RefreshIcon className="w-5 h-5" />}
           />
           <StatsCard
             title="Resolved"
             value={complaintStats.resolved}
             trend="up"
-            icon={<span className="text-xl">✅</span>}
+            icon={<ViewIcon className="w-5 h-5" />}
           />
           <StatsCard
             title="Escalated"
             value={complaintStats.escalated}
             trend={complaintStats.escalated > 0 ? "down" : "neutral"}
-            icon={<span className="text-xl">🚨</span>}
+            icon={<EditIcon className="w-5 h-5" />}
           />
         </div>
 
         {/* Complaints Table */}
         <Card
-          title="📋 All Complaints"
+          title="All Complaints"
           subtitle="Your complaint history and current status"
+          icon={<ComplaintsIcon className="w-5 h-5" />}
         >
           <Table
             data={complaints}
@@ -228,7 +216,7 @@ export default function StudentComplaintsPage() {
       <Modal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title="📝 Create New Complaint"
+        title="Create New Complaint"
         size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -307,9 +295,19 @@ export default function StudentComplaintsPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="btn-primary"
+              className="btn-primary flex items-center gap-2"
             >
-              {submitting ? "Submitting..." : "Submit Complaint"}
+              {submitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <PlusIcon className="w-4 h-4" />
+                  Submit Complaint
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -319,7 +317,7 @@ export default function StudentComplaintsPage() {
       <Modal
         isOpen={!!selectedComplaint}
         onClose={() => setSelectedComplaint(null)}
-        title="🔍 Complaint Details"
+        title="Complaint Details"
         size="lg"
       >
         {selectedComplaint && (

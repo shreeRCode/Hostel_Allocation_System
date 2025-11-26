@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { NotificationBadge } from "../common/StatusBadge";
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { NotificationIcon, UserIcon, LogoutIcon, CloseIcon } from "../common/Icons";
 
 export default function Topbar() {
   const { logout, user } = useAuth();
@@ -49,7 +50,6 @@ export default function Topbar() {
       <div className="flex items-center gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-lg">👋</span>
             <span className="text-slate-300 text-sm">
               Welcome back, <span className="font-semibold text-white">{user?.name}</span>
             </span>
@@ -62,7 +62,7 @@ export default function Topbar() {
       <div className="flex items-center gap-4">
         {/* Time Display */}
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50">
-          <span className="text-xs text-slate-400">🕐</span>
+          <span className="text-xs text-slate-400">Current Time:</span>
           <span className="text-sm font-mono text-slate-300">{currentTime}</span>
         </div>
 
@@ -72,7 +72,7 @@ export default function Topbar() {
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 transition-colors"
           >
-            <span className="text-lg">🔔</span>
+            <NotificationIcon className="w-5 h-5 text-slate-300" />
             <NotificationBadge count={3} />
           </button>
           
@@ -81,7 +81,7 @@ export default function Topbar() {
               className="notification-portal z-notification" 
               style={{ zIndex: 2147483647 }}
             >
-              <div className="absolute right-6 top-16 w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl animate-fade-in backdrop-blur-sm">
+              <div className="absolute right-6 top-16 w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl animate-fade-in">
                 <div className="p-4 border-b border-slate-700">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-white">Notifications</h3>
@@ -89,7 +89,7 @@ export default function Topbar() {
                       onClick={() => setShowNotifications(false)}
                       className="text-slate-400 hover:text-white transition-colors"
                     >
-                      ✕
+                      <CloseIcon className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -117,14 +117,15 @@ export default function Topbar() {
 
         {/* User Menu */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
-            {user?.name?.charAt(0) || 'U'}
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
+            <UserIcon className="w-4 h-4 text-white" />
           </div>
           
           <button
             onClick={handleLogout}
-            className="px-4 py-2 rounded-lg text-sm bg-slate-800/50 text-slate-200 hover:bg-red-600/20 hover:text-red-300 border border-slate-700/50 hover:border-red-500/30 transition-all duration-200"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-slate-800/50 text-slate-200 hover:bg-red-600/20 hover:text-red-300 border border-slate-700/50 hover:border-red-500/30 transition-all duration-200"
           >
+            <LogoutIcon className="w-4 h-4" />
             Logout
           </button>
         </div>

@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
 
 // Import routes
@@ -30,6 +33,22 @@ app.use('/api/complaints', complaintsRoutes);
 app.use('/api/hostels', hostelsRoutes);
 app.use('/api/rooms', roomsRoutes);
 app.use('/api/allocation', allocationRoutes);
+
+// Swagger Documentation
+try {
+  const swaggerDocument = YAML.load(path.join(__dirname, '../swagger.yaml'));
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Hostel Management API',
+    explorer: true
+  }));
+  console.log('📚 Swagger UI available at /api-docs');
+} catch (error) {
+  console.error('❌ Failed to load Swagger documentation:', error.message);
+  app.get('/api-docs', (req, res) => {
+    res.json({ error: 'Swagger documentation not available', message: error.message });
+  });
+}
 
 // Health check
 app.get('/api/health', (req, res) => {

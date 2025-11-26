@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { loginAdmin, loginStudent } from "../../services/authService";
 import { ROLES } from "../../utils/constants";
+import { UserIcon, LogoutIcon } from "../../components/common/Icons";
 
 export default function LoginPage() {
   const [role, setRole] = useState(ROLES.STUDENT);
@@ -53,11 +54,11 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">H</span>
+              <span className="text-2xl font-bold text-white">HMS</span>
             </div>
             <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
             <p className="text-sm text-slate-400">
-              Smart Hostel Management System
+              Hostel Management System
             </p>
           </div>
 
@@ -73,7 +74,7 @@ export default function LoginPage() {
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <span>🎓</span>
+                <UserIcon className="w-4 h-4" />
                 Student
               </div>
             </button>
@@ -87,7 +88,7 @@ export default function LoginPage() {
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <span>👨‍💼</span>
+                <LogoutIcon className="w-4 h-4" />
                 Admin
               </div>
             </button>
@@ -108,7 +109,7 @@ export default function LoginPage() {
                   required
                   className="w-full rounded-xl border border-slate-700/50 bg-slate-900/50 px-4 py-3 text-sm text-slate-50 placeholder:text-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-all"
                 />
-                <span className="absolute right-3 top-3 text-slate-400">📧</span>
+                <span className="absolute right-3 top-3 text-slate-400">@</span>
               </div>
             </div>
 
@@ -130,7 +131,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-slate-400 hover:text-slate-300"
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
             </div>
@@ -138,7 +139,7 @@ export default function LoginPage() {
             {error && (
               <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
                 <p className="text-sm text-red-400 flex items-center gap-2">
-                  <span>⚠️</span>
+                  <span>!</span>
                   {error}
                 </p>
               </div>
@@ -159,8 +160,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-
 
           {/* Footer */}
           <div className="mt-6 text-center">
