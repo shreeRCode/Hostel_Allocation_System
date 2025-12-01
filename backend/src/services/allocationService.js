@@ -1,88 +1,100 @@
-const prisma = require('../config/prisma');
+const prisma = require("../config/prisma");
 
-const runAllocation = async () => {
-  try {
-    // Get unallocated students
-    const unallocatedStudents = await prisma.student.findMany({
+// ------------------------
+// Fallback Logic
+// ------------------------
+function getFallback(gender, primary) {
+  if (gender === "FEMALE") {
+    // Female → only Beta & Gamma exist
+    return primary === "Beta" ? "Gamma" : "Beta";
+  }
+
+  if (gender === "MALE") {
+    // Male → only Alpha & Gamma exist
+    return primary === "Alpha" ? "Gamma" : "Alpha";
+  }
+
+  return null;
+}
+
+// ------------------------
+// Assign Room Helper
+// ------------------------
+async function assignStudentToRoom(student, room) {
+  await prisma.allocation.create({
+    data: {
+      studentId: student.id,
+      roomId: room.id,
+      active: true,
+      allocatedAt: new Date(),
+    },
+  });
+
+  await prisma.room.update({
+    where: { id: room.id },
+    data: { currentOccupancy: { increment: 1 } },
+  });
+
+  await prisma.student.update({
+    where: { id: student.id },
+    data: { allocated: true },
+  });
+}
+
+// ------------------------
+// Allocation Main Function
+// ------------------------
+module.exports.runAllocation = async function () {
+  const students = await prisma.student.findMany({
+    where: { allocated: false },
+    orderBy: { createdAt: "asc" }, // priority: earliest registration
+  });
+
+  let assigned = 0;
+
+  for (const student of students) {
+    const primary = student.preferredHostel; // Alpha/Beta/Gamma
+    const fallback = getFallback(student.gender, primary);
+
+    // ------------------------
+    // Try Primary Hostel
+    // ------------------------
+    let room = await prisma.room.findFirst({
       where: {
-        allocations: {
-          none: { active: true }
-        }
+        hostelName: primary,
+        currentOccupancy: { lt: prisma.room.fields.capacity },
       },
-      orderBy: [
-        { disciplineScore: 'desc' },
-        { year: 'asc' }
-      ]
     });
 
-    // Get available rooms
-    const availableRooms = await prisma.room.findMany({
-      where: {
-        currentOccupancy: {
-          lt: prisma.room.fields.capacity
-        }
-      },
-      include: {
-        hostel: true
-      },
-      orderBy: [
-        { hostel: { distance: 'asc' } }
-      ]
-    });
-
-    let assigned = 0;
-    const allocations = [];
-
-    for (const student of unallocatedStudents) {
-      // Find suitable room based on gender and availability
-      const suitableRoom = availableRooms.find(room => 
-        room.hostel.genderAllowed === student.gender && 
-        room.currentOccupancy < room.capacity
-      );
-
-      if (suitableRoom) {
-        // Create allocation
-        const allocation = await prisma.allocation.create({
-          data: {
-            studentId: student.id,
-            roomId: suitableRoom.id
-          }
-        });
-
-        // Update room occupancy
-        await prisma.room.update({
-          where: { id: suitableRoom.id },
-          data: {
-            currentOccupancy: {
-              increment: 1
-            }
-          }
-        });
-
-        // Update available rooms array
-        suitableRoom.currentOccupancy += 1;
-        
-        allocations.push(allocation);
-        assigned++;
-      }
+    if (room) {
+      await assignStudentToRoom(student, room);
+      assigned++;
+      continue;
     }
 
-    const remainingStudents = unallocatedStudents.length - assigned;
-    const remainingRooms = availableRooms.filter(room => 
-      room.currentOccupancy < room.capacity
-    ).length;
+    // ------------------------
+    // Try Fallback Hostel
+    // ------------------------
+    room = await prisma.room.findFirst({
+      where: {
+        hostelName: fallback,
+        currentOccupancy: { lt: prisma.room.fields.capacity },
+      },
+    });
 
-    return {
-      message: 'Allocation run completed',
-      summary: {
-        assigned,
-        remainingStudents,
-        remainingRooms
-      }
-    };
-  } catch (error) {
-    throw new Error(`Allocation failed: ${error.message}`);
+    if (room) {
+      await assignStudentToRoom(student, room);
+      assigned++;
+      continue;
+    }
+
+    // If no room in primary OR fallback → leave unallocated
   }
-};
 
-module.exports = { runAllocation };
+  return {
+    summary: {
+      assigned,
+      unassigned: students.length - assigned,
+    },
+  };
+};
