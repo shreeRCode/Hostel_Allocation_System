@@ -76,9 +76,9 @@ export default function AdminAllocationsPage() {
                 <tbody className="divide-y divide-slate-800 bg-slate-950/60">
                   {allocs.map((a) => (
                     <tr key={a.id}>
-                      <td className="px-3 py-2">{a.studentName}</td>
-                      <td className="px-3 py-2">{a.hostelName}</td>
-                      <td className="px-3 py-2">{a.roomNumber}</td>
+                      <td className="px-3 py-2">{a.student?.name || 'N/A'}</td>
+                      <td className="px-3 py-2">{a.room?.hostel?.name || 'N/A'}</td>
+                      <td className="px-3 py-2">{a.room?.roomNumber || 'N/A'}</td>
                       <td className="px-3 py-2">
                         {new Date(a.allocatedAt).toLocaleString()}
                       </td>

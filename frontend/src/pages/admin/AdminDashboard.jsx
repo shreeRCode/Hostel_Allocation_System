@@ -128,12 +128,22 @@ export default function AdminDashboard() {
     { 
       key: 'student', 
       label: 'Student Name',
-      render: (value) => value?.name || 'N/A'
+      render: (value, item) => item?.student?.name || 'N/A'
+    },
+    { 
+      key: 'student', 
+      label: 'Email',
+      render: (value, item) => item?.student?.email || 'N/A'
     },
     { 
       key: 'room', 
-      label: 'Room',
-      render: (value) => `${value?.hostel?.name} - ${value?.roomNumber}` || 'N/A'
+      label: 'Hostel',
+      render: (value, item) => item?.room?.hostel?.name || 'N/A'
+    },
+    { 
+      key: 'room', 
+      label: 'Room Number',
+      render: (value, item) => item?.room?.roomNumber || 'N/A'
     },
     { key: 'allocatedAt', label: 'Allocated At', type: 'datetime' }
   ];
