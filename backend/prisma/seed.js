@@ -134,7 +134,7 @@ async function main() {
       name: 'John Doe',
       email: 'john@student.com',
       password: hashedStudentPassword,
-      branch: 'Computer Science',
+      branch: 'Computer Science & Engineering',
       year: 2,
       gender: 'MALE',
       disciplineScore: 85
@@ -143,7 +143,7 @@ async function main() {
       name: 'Jane Smith',
       email: 'jane@student.com',
       password: hashedStudentPassword,
-      branch: 'Electronics',
+      branch: 'Electronics & Communication Engineering',
       year: 1,
       gender: 'FEMALE',
       disciplineScore: 92
@@ -152,10 +152,118 @@ async function main() {
       name: 'Mike Johnson',
       email: 'mike@student.com',
       password: hashedStudentPassword,
-      branch: 'Mechanical',
+      branch: 'Mechanical Engineering',
       year: 3,
       gender: 'MALE',
       disciplineScore: 78
+    },
+    {
+      name: 'Sarah Wilson',
+      email: 'sarah@student.com',
+      password: hashedStudentPassword,
+      branch: 'Information Science & Engineering',
+      year: 2,
+      gender: 'FEMALE',
+      disciplineScore: 88
+    },
+    {
+      name: 'Alex Chen',
+      email: 'alex@student.com',
+      password: hashedStudentPassword,
+      branch: 'Artificial Intelligence & Data Science',
+      year: 1,
+      gender: 'MALE',
+      disciplineScore: 95
+    },
+    {
+      name: 'Emily Davis',
+      email: 'emily@student.com',
+      password: hashedStudentPassword,
+      branch: 'Biotechnology',
+      year: 4,
+      gender: 'FEMALE',
+      disciplineScore: 82
+    },
+    {
+      name: 'David Brown',
+      email: 'david@student.com',
+      password: hashedStudentPassword,
+      branch: 'Civil Engineering',
+      year: 3,
+      gender: 'MALE',
+      disciplineScore: 76
+    },
+    {
+      name: 'Lisa Garcia',
+      email: 'lisa@student.com',
+      password: hashedStudentPassword,
+      branch: 'Electrical & Electronics Engineering',
+      year: 2,
+      gender: 'FEMALE',
+      disciplineScore: 90
+    },
+    {
+      name: 'Ryan Miller',
+      email: 'ryan@student.com',
+      password: hashedStudentPassword,
+      branch: 'Computer Science & Engineering(Cyber Security)',
+      year: 1,
+      gender: 'MALE',
+      disciplineScore: 87
+    },
+    {
+      name: 'Priya Patel',
+      email: 'priya@student.com',
+      password: hashedStudentPassword,
+      branch: 'Robotics & Artificial Intelligence',
+      year: 3,
+      gender: 'FEMALE',
+      disciplineScore: 93
+    },
+    {
+      name: 'Kevin Lee',
+      email: 'kevin@student.com',
+      password: hashedStudentPassword,
+      branch: 'Electronics Engineering (VLSI Design & Technology)',
+      year: 4,
+      gender: 'MALE',
+      disciplineScore: 81
+    },
+    {
+      name: 'Maria Rodriguez',
+      email: 'maria@student.com',
+      password: hashedStudentPassword,
+      branch: 'Computer & Communication Engineering',
+      year: 2,
+      gender: 'FEMALE',
+      disciplineScore: 89
+    },
+    {
+      name: 'James Taylor',
+      email: 'james@student.com',
+      password: hashedStudentPassword,
+      branch: 'Artificial Intelligence & Machine Learning',
+      year: 1,
+      gender: 'MALE',
+      disciplineScore: 84
+    },
+    {
+      name: 'Anna Thompson',
+      email: 'anna@student.com',
+      password: hashedStudentPassword,
+      branch: 'Electronics & Communication (Advanced Communication Technology)',
+      year: 3,
+      gender: 'FEMALE',
+      disciplineScore: 91
+    },
+    {
+      name: 'Chris Anderson',
+      email: 'chris@student.com',
+      password: hashedStudentPassword,
+      branch: 'Computer Science & Engineering',
+      year: 4,
+      gender: 'MALE',
+      disciplineScore: 79
     }
   ];
 
