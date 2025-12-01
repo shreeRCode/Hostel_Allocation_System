@@ -37,6 +37,15 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
       <div className="w-full max-w-xl rounded-3xl border border-slate-800 bg-slate-950/90 p-7 shadow-2xl shadow-slate-950/70">
+        <button
+          onClick={() => navigate('/')}
+          className="mb-4 flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors duration-200 group"
+        >
+          <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="text-sm font-medium">Back to Home</span>
+        </button>
         <h1 className="text-2xl font-semibold text-slate-50 text-center mb-1">
           Student Registration
         </h1>
@@ -146,15 +155,23 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="mt-4 text-center text-[11px] text-slate-500">
-          Already registered?{" "}
+        <div className="mt-4 flex items-center justify-between text-[11px] text-slate-500">
           <Link
-            to="/login"
-            className="font-medium text-indigo-400 hover:text-indigo-300"
+            to="/"
+            className="font-medium text-slate-400 hover:text-slate-300 transition-colors duration-200"
           >
-            Sign in
+            ← Home
           </Link>
-        </p>
+          <span>
+            Already registered?{" "}
+            <Link
+              to="/login"
+              className="font-medium text-indigo-400 hover:text-indigo-300"
+            >
+              Sign in
+            </Link>
+          </span>
+        </div>
       </div>
     </div>
   );

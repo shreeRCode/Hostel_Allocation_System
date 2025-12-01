@@ -111,6 +111,7 @@
 // }
 import { Routes, Route, Navigate } from "react-router-dom";
 
+import HomePage from "./pages/HomePage.jsx";
 import LoginPage from "./pages/auth/LoginPage.jsx";
 import RegisterPage from "./pages/auth/RegisterPage.jsx";
 
@@ -126,8 +127,8 @@ import AdminAllocationsPage from "./pages/admin/AdminAllocationsPage.jsx";
 export default function App() {
   return (
     <Routes>
-      {/* Default route */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Home page */}
+      <Route path="/" element={<HomePage />} />
 
       {/* Auth */}
       <Route path="/login" element={<LoginPage />} />

@@ -51,6 +51,15 @@ export default function LoginPage() {
       {/* Login Card */}
       <div className="relative w-full max-w-md">
         <div className="rounded-3xl border border-slate-800/50 bg-slate-950/90 backdrop-blur-xl shadow-2xl shadow-slate-950/50 p-8">
+          <button
+            onClick={() => navigate('/')}
+            className="mb-4 flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors duration-200 group"
+          >
+            <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className="text-sm font-medium">Back to Home</span>
+          </button>
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
@@ -162,8 +171,14 @@ export default function LoginPage() {
           </form>
 
           {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-slate-500">
+          <div className="mt-6 flex items-center justify-between text-xs text-slate-500">
+            <button
+              onClick={() => navigate('/')}
+              className="font-medium text-slate-400 hover:text-slate-300 transition-colors duration-200"
+            >
+              ← Home
+            </button>
+            <span>
               Don't have an account?{" "}
               <button
                 onClick={() => navigate("/register")}
@@ -171,7 +186,7 @@ export default function LoginPage() {
               >
                 Register here
               </button>
-            </p>
+            </span>
           </div>
         </div>
       </div>
