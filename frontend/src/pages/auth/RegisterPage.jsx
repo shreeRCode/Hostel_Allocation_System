@@ -100,13 +100,29 @@ export default function RegisterPage() {
             <label className="block text-xs font-medium text-slate-200 mb-1">
               Branch
             </label>
-            <input
+            <select
               name="branch"
               value={form.branch}
               onChange={handleChange}
               required
               className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-            />
+            >
+              <option value="">Select Department</option>
+              <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
+              <option value="Artificial Intelligence & Machine Learning">Artificial Intelligence & Machine Learning</option>
+              <option value="Biotechnology">Biotechnology</option>
+              <option value="Civil Engineering">Civil Engineering</option>
+              <option value="Computer & Communication Engineering">Computer & Communication Engineering</option>
+              <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+              <option value="Computer Science & Engineering(Cyber Security)">Computer Science & Engineering(Cyber Security)</option>
+              <option value="Electrical & Electronics Engineering">Electrical & Electronics Engineering</option>
+              <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
+              <option value="Electronics Engineering (VLSI Design & Technology)">Electronics Engineering (VLSI Design & Technology)</option>
+              <option value="Electronics & Communication (Advanced Communication Technology)">Electronics & Communication (Advanced Communication Technology)</option>
+              <option value="Information Science & Engineering">Information Science & Engineering</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Robotics & Artificial Intelligence">Robotics & Artificial Intelligence</option>
+            </select>
           </div>
 
           <div>
