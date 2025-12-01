@@ -7,9 +7,10 @@ export default function RegisterPage() {
     name: "",
     email: "",
     password: "",
+    gender: "",
+    preference: "",
     branch: "",
     year: "",
-    gender: "F",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,8 +55,9 @@ export default function RegisterPage() {
           and room for you.
         </p>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-          <div className="col-span-2">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Full Name - Full Width */}
+          <div>
             <label className="block text-xs font-medium text-slate-200 mb-1">
               Full Name
             </label>
@@ -68,7 +70,8 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="col-span-2">
+          {/* Email - Full Width */}
+          <div>
             <label className="block text-xs font-medium text-slate-200 mb-1">
               Email
             </label>
@@ -82,6 +85,7 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* Password - Full Width */}
           <div>
             <label className="block text-xs font-medium text-slate-200 mb-1">
               Password
@@ -96,68 +100,107 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-slate-200 mb-1">
-              Branch
-            </label>
-            <select
-              name="branch"
-              value={form.branch}
-              onChange={handleChange}
-              required
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-            >
-              <option value="">Select Department</option>
-              <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
-              <option value="Artificial Intelligence & Machine Learning">Artificial Intelligence & Machine Learning</option>
-              <option value="Biotechnology">Biotechnology</option>
-              <option value="Civil Engineering">Civil Engineering</option>
-              <option value="Computer & Communication Engineering">Computer & Communication Engineering</option>
-              <option value="Computer Science & Engineering">Computer Science & Engineering</option>
-              <option value="Computer Science & Engineering(Cyber Security)">Computer Science & Engineering(Cyber Security)</option>
-              <option value="Electrical & Electronics Engineering">Electrical & Electronics Engineering</option>
-              <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
-              <option value="Electronics Engineering (VLSI Design & Technology)">Electronics Engineering (VLSI Design & Technology)</option>
-              <option value="Electronics & Communication (Advanced Communication Technology)">Electronics & Communication (Advanced Communication Technology)</option>
-              <option value="Information Science & Engineering">Information Science & Engineering</option>
-              <option value="Mechanical Engineering">Mechanical Engineering</option>
-              <option value="Robotics & Artificial Intelligence">Robotics & Artificial Intelligence</option>
-            </select>
+          {/* Gender and Preference - Side by Side */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-200 mb-1">
+                Gender
+              </label>
+              <select
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                required
+                className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+              >
+                <option value="">Select Gender</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-200 mb-1">
+                Hostel Preference
+              </label>
+              <select
+                name="preference"
+                value={form.preference}
+                onChange={handleChange}
+                required
+                disabled={!form.gender}
+                className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-50"
+              >
+                <option value="">Select Hostel</option>
+                {form.gender === 'MALE' && (
+                  <>
+                    <option value="Alpha Block (Male)">Alpha Block (Male)</option>
+                    <option value="Gamma Block (Co-ed)">Gamma Block (Co-ed)</option>
+                  </>
+                )}
+                {form.gender === 'FEMALE' && (
+                  <>
+                    <option value="Beta Block (Female)">Beta Block (Female)</option>
+                    <option value="Gamma Block (Co-ed)">Gamma Block (Co-ed)</option>
+                  </>
+                )}
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-slate-200 mb-1">
-              Year
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={4}
-              name="year"
-              value={form.year}
-              onChange={handleChange}
-              required
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-            />
-          </div>
+          {/* Department and Year - Side by Side */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-200 mb-1">
+                Department
+              </label>
+              <select
+                name="branch"
+                value={form.branch}
+                onChange={handleChange}
+                required
+                className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+              >
+                <option value="">Select Department</option>
+                <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
+                <option value="Artificial Intelligence & Machine Learning">Artificial Intelligence & Machine Learning</option>
+                <option value="Biotechnology">Biotechnology</option>
+                <option value="Civil Engineering">Civil Engineering</option>
+                <option value="Computer & Communication Engineering">Computer & Communication Engineering</option>
+                <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                <option value="Computer Science & Engineering(Cyber Security)">Computer Science & Engineering(Cyber Security)</option>
+                <option value="Electrical & Electronics Engineering">Electrical & Electronics Engineering</option>
+                <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
+                <option value="Electronics Engineering (VLSI Design & Technology)">Electronics Engineering (VLSI Design & Technology)</option>
+                <option value="Electronics & Communication (Advanced Communication Technology)">Electronics & Communication (Advanced Communication Technology)</option>
+                <option value="Information Science & Engineering">Information Science & Engineering</option>
+                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                <option value="Robotics & Artificial Intelligence">Robotics & Artificial Intelligence</option>
+              </select>
+            </div>
 
-          <div>
-            <label className="block text-xs font-medium text-slate-200 mb-1">
-              Gender
-            </label>
-            <select
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-            >
-              <option value="F">Female</option>
-              <option value="M">Male</option>
-            </select>
+            <div>
+              <label className="block text-xs font-medium text-slate-200 mb-1">
+                Year
+              </label>
+              <select
+                name="year"
+                value={form.year}
+                onChange={handleChange}
+                required
+                className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+              >
+                <option value="">Select Year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
+            </div>
           </div>
 
           {error && (
-            <p className="col-span-2 text-xs font-medium text-rose-400">
+            <p className="text-xs font-medium text-rose-400">
               {error}
             </p>
           )}
@@ -165,7 +208,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="col-span-2 mt-1 w-full rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-500/40 transition hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="mt-1 w-full rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-500/40 transition hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Creating account..." : "Create account"}
           </button>
