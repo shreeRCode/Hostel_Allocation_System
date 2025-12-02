@@ -1,100 +1,255 @@
-const prisma = require("../config/prisma");
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-// ------------------------
-// Fallback Logic
-// ------------------------
-function getFallback(gender, primary) {
-  if (gender === "FEMALE") {
-    // Female → only Beta & Gamma exist
-    return primary === "Beta" ? "Gamma" : "Beta";
+class AllocationService {
+  async allocateRooms() {
+    try {
+      // Get all unallocated students
+      const unallocatedStudents = await prisma.student.findMany({
+        where: {
+          allocations: {
+            none: {
+              active: true
+            }
+          }
+        },
+        orderBy: [
+          { createdAt: 'asc' }
+        ]
+      });
+
+      if (unallocatedStudents.length === 0) {
+        return {
+          success: true,
+          message: 'No students to allocate',
+          allocations: []
+        };
+      }
+
+      const allocations = [];
+      const errors = [];
+
+      for (const student of unallocatedStudents) {
+        try {
+          const allocation = await this.allocateStudent(student);
+          if (allocation) {
+            allocations.push(allocation);
+          }
+        } catch (error) {
+          console.error(`Error allocating student ${student.name}:`, error);
+          errors.push({
+            studentId: student.id,
+            studentName: student.name,
+            error: error.message
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: `Allocated ${allocations.length} students`,
+        allocations,
+        errors: errors.length > 0 ? errors : undefined
+      };
+    } catch (error) {
+      console.error('Allocation service error:', error);
+      throw new Error(`Allocation failed: ${error.message}`);
+    }
   }
 
-  if (gender === "MALE") {
-    // Male → only Alpha & Gamma exist
-    return primary === "Alpha" ? "Gamma" : "Alpha";
-  }
+  async allocateStudent(student) {
+    // Determine preferred and fallback hostels
+    let preferredHostel = null;
+    let fallbackHostel = null;
 
-  return null;
-}
-
-// ------------------------
-// Assign Room Helper
-// ------------------------
-async function assignStudentToRoom(student, room) {
-  await prisma.allocation.create({
-    data: {
-      studentId: student.id,
-      roomId: room.id,
-      active: true,
-      allocatedAt: new Date(),
-    },
-  });
-
-  await prisma.room.update({
-    where: { id: room.id },
-    data: { currentOccupancy: { increment: 1 } },
-  });
-
-  await prisma.student.update({
-    where: { id: student.id },
-    data: { allocated: true },
-  });
-}
-
-// ------------------------
-// Allocation Main Function
-// ------------------------
-module.exports.runAllocation = async function () {
-  const students = await prisma.student.findMany({
-    where: { allocated: false },
-    orderBy: { createdAt: "asc" }, // priority: earliest registration
-  });
-
-  let assigned = 0;
-
-  for (const student of students) {
-    const primary = student.preferredHostel; // Alpha/Beta/Gamma
-    const fallback = getFallback(student.gender, primary);
-
-    // ------------------------
-    // Try Primary Hostel
-    // ------------------------
-    let room = await prisma.room.findFirst({
-      where: {
-        hostelName: primary,
-        currentOccupancy: { lt: prisma.room.fields.capacity },
-      },
-    });
-
-    if (room) {
-      await assignStudentToRoom(student, room);
-      assigned++;
-      continue;
+    if (student.preferredHostel) {
+      preferredHostel = await prisma.hostel.findFirst({
+        where: { name: student.preferredHostel }
+      });
     }
 
-    // ------------------------
-    // Try Fallback Hostel
-    // ------------------------
-    room = await prisma.room.findFirst({
-      where: {
-        hostelName: fallback,
-        currentOccupancy: { lt: prisma.room.fields.capacity },
-      },
+    // Set fallback to Gamma for both genders
+    fallbackHostel = await prisma.hostel.findFirst({
+      where: { name: 'Gamma' }
     });
 
-    if (room) {
-      await assignStudentToRoom(student, room);
-      assigned++;
-      continue;
+    // Try preferred hostel first
+    if (preferredHostel && this.canAllocateToHostel(student, preferredHostel)) {
+      const room = await this.findAvailableRoom(preferredHostel.id);
+      if (room) {
+        return await this.createAllocation(student, room);
+      }
     }
 
-    // If no room in primary OR fallback → leave unallocated
+    // Try fallback hostel
+    if (fallbackHostel && this.canAllocateToHostel(student, fallbackHostel)) {
+      const room = await this.findAvailableRoom(fallbackHostel.id);
+      if (room) {
+        return await this.createAllocation(student, room);
+      }
+    }
+
+    throw new Error(`No available rooms for student ${student.name}`);
   }
 
-  return {
-    summary: {
-      assigned,
-      unassigned: students.length - assigned,
-    },
-  };
-};
+  canAllocateToHostel(student, hostel) {
+    if (hostel.genderAllowed === 'BOTH') return true;
+    if (hostel.genderAllowed === 'MALE' && student.gender === 'MALE') return true;
+    if (hostel.genderAllowed === 'FEMALE' && student.gender === 'FEMALE') return true;
+    return false;
+  }
+
+  async findAvailableRoom(hostelId) {
+    const rooms = await prisma.room.findMany({
+      where: {
+        hostelId
+      },
+      orderBy: {
+        roomNumber: 'asc'
+      }
+    });
+    
+    return rooms.find(room => room.occupiedCount < room.capacity) || null;
+  }
+
+  async createAllocation(student, room) {
+    return await prisma.$transaction(async (tx) => {
+      // Double-check room availability
+      const currentRoom = await tx.room.findUnique({
+        where: { id: room.id }
+      });
+
+      if (currentRoom.occupiedCount >= currentRoom.capacity) {
+        throw new Error('Room is now full');
+      }
+
+      // Create allocation
+      const allocation = await tx.allocation.create({
+        data: {
+          studentId: student.id,
+          roomId: room.id,
+          active: true
+        },
+        include: {
+          student: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              gender: true,
+              year: true,
+              branch: true
+            }
+          },
+          room: {
+            include: {
+              hostel: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Update room occupancy
+      await tx.room.update({
+        where: { id: room.id },
+        data: {
+          occupiedCount: {
+            increment: 1
+          }
+        }
+      });
+
+      return allocation;
+    });
+  }
+
+  async getAllocations() {
+    return await prisma.allocation.findMany({
+      where: {
+        active: true
+      },
+      include: {
+        student: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            gender: true,
+            year: true,
+            branch: true
+          }
+        },
+        room: {
+          include: {
+            hostel: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: [
+        { room: { hostel: { name: 'asc' } } },
+        { room: { roomNumber: 'asc' } }
+      ]
+    });
+  }
+
+  async getStudentAllocation(studentId) {
+    return await prisma.allocation.findFirst({
+      where: {
+        studentId: parseInt(studentId),
+        active: true
+      },
+      include: {
+        room: {
+          include: {
+            hostel: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  async getHostelOccupancy() {
+    const hostels = await prisma.hostel.findMany({
+      include: {
+        rooms: {
+          select: {
+            capacity: true,
+            occupiedCount: true
+          }
+        }
+      }
+    });
+
+    return hostels.map(hostel => {
+      const totalCapacity = hostel.rooms.reduce((sum, room) => sum + room.capacity, 0);
+      const totalOccupied = hostel.rooms.reduce((sum, room) => sum + room.occupiedCount, 0);
+      
+      return {
+        id: hostel.id,
+        name: hostel.name,
+        genderAllowed: hostel.genderAllowed,
+        totalCapacity,
+        totalOccupied,
+        availableSpots: totalCapacity - totalOccupied,
+        occupancyRate: totalCapacity > 0 ? (totalOccupied / totalCapacity * 100).toFixed(1) : 0
+      };
+    });
+  }
+}
+
+module.exports = new AllocationService();

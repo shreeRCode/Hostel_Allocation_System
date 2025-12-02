@@ -134,14 +134,14 @@ export default function RegisterPage() {
                 <option value="">Select Hostel</option>
                 {form.gender === 'MALE' && (
                   <>
-                    <option value="Alpha Block (Male)">Alpha Block (Male)</option>
-                    <option value="Gamma Block (Co-ed)">Gamma Block (Co-ed)</option>
+                    <option value="Beta">Beta (Boys)</option>
+                    <option value="Gamma">Gamma (Co-ed)</option>
                   </>
                 )}
                 {form.gender === 'FEMALE' && (
                   <>
-                    <option value="Beta Block (Female)">Beta Block (Female)</option>
-                    <option value="Gamma Block (Co-ed)">Gamma Block (Co-ed)</option>
+                    <option value="Alpha">Alpha (Girls)</option>
+                    <option value="Gamma">Gamma (Co-ed)</option>
                   </>
                 )}
               </select>

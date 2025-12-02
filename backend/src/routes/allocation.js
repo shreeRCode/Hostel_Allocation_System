@@ -30,8 +30,18 @@ router.get('/', authMiddleware, requireAdmin, async (req, res) => {
 // Run Allocation Algorithm
 router.post('/run', authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const result = await allocationService.runAllocation();
+    const result = await allocationService.allocateRooms();
     res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Get Hostel Occupancy
+router.get('/occupancy', authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    const occupancy = await allocationService.getHostelOccupancy();
+    res.json({ occupancy });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

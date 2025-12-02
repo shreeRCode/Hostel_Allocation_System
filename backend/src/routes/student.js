@@ -30,7 +30,7 @@ router.get('/allocation', authMiddleware, requireStudent, async (req, res) => {
         id: allocation.id,
         hostelName: allocation.room.hostel.name,
         roomNumber: allocation.room.roomNumber,
-        occupancy: allocation.room.currentOccupancy,
+        occupancy: allocation.room.occupiedCount,
         capacity: allocation.room.capacity,
         allocatedAt: allocation.allocatedAt.toISOString()
       }

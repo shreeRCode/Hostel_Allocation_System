@@ -106,9 +106,15 @@ export default function AdminDashboard() {
         auth: true,
       });
 
-      alert(
-        `Allocation completed! ${result.summary.assigned} students assigned.`
-      );
+      if (result.success) {
+        alert(`${result.message}`);
+        if (result.errors && result.errors.length > 0) {
+          console.log('Allocation errors:', result.errors);
+        }
+      } else {
+        alert('Allocation failed');
+      }
+      
       setShowAllocationModal(false);
       fetchDashboardData(); // Refresh data
     } catch (error) {
@@ -316,31 +322,7 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* System Health */}
-        <Card
-          title="System Health"
-          subtitle="Current system status and metrics"
-          icon={<SettingsIcon className="w-5 h-5" />}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <HealthMetric
-              label="Database"
-              status="ACTIVE"
-              value="99.9% uptime"
-            />
-            <HealthMetric
-              label="API Response"
-              status="ACTIVE"
-              value="< 200ms avg"
-            />
-            <HealthMetric label="Storage" status="ACTIVE" value="78% used" />
-            <HealthMetric
-              label="Last Backup"
-              status="ACTIVE"
-              value="2 hours ago"
-            />
-          </div>
-        </Card>
+
       </div>
 
       {/* Allocation Modal */}
@@ -409,15 +391,4 @@ export default function AdminDashboard() {
   );
 }
 
-function HealthMetric({ label, status, value }) {
-  return (
-    <div className="p-4 rounded-xl bg-slate-800/30">
-      <div className="flex items-center justify-between mb-2">
-        <SettingsIcon className="w-5 h-5 text-slate-400" />
-        <StatusBadge status={status} size="xs" />
-      </div>
-      <p className="text-sm text-slate-400 mb-1">{label}</p>
-      <p className="text-lg font-semibold text-white">{value}</p>
-    </div>
-  );
-}
+

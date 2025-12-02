@@ -18,8 +18,7 @@ model Student {
   branch          String
   year            Int
   gender          String
-  disciplineScore Int?
-  preferences     String?
+  preferredHostel String?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
@@ -50,7 +49,7 @@ model Room {
   hostelId         Int
   roomNumber       String
   capacity         Int
-  currentOccupancy Int          @default(0)
+  occupiedCount    Int          @default(0)
   createdAt        DateTime     @default(now())
 
   hostel           Hostel       @relation(fields: [hostelId], references: [id])

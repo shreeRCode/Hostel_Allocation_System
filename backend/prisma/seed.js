@@ -15,9 +15,9 @@ async function main() {
     where: { id: 1 },
     update: {},
     create: {
-      name: "Alpha Block (Male)",
-      genderAllowed: "MALE",
-      capacity: 200,
+      name: "Alpha",
+      genderAllowed: "FEMALE",
+      capacity: 90,
     },
   });
 
@@ -25,9 +25,9 @@ async function main() {
     where: { id: 2 },
     update: {},
     create: {
-      name: "Beta Block (Female)",
-      genderAllowed: "FEMALE",
-      capacity: 150,
+      name: "Beta",
+      genderAllowed: "MALE",
+      capacity: 120,
     },
   });
 
@@ -35,9 +35,9 @@ async function main() {
     where: { id: 3 },
     update: {},
     create: {
-      name: "Gamma Block (Co-ed)",
+      name: "Gamma",
       genderAllowed: "BOTH",
-      capacity: 180,
+      capacity: 100,
     },
   });
 
@@ -50,7 +50,7 @@ async function main() {
     where: { email: "alpha@hostel.com" },
     update: {},
     create: {
-      name: "Alpha Hostel Admin",
+      name: "Alpha Admin",
       email: "alpha@hostel.com",
       password: hashedPassword,
       role: "HOSTEL_ADMIN",
@@ -62,7 +62,7 @@ async function main() {
     where: { email: "beta@hostel.com" },
     update: {},
     create: {
-      name: "Beta Hostel Admin",
+      name: "Beta Admin",
       email: "beta@hostel.com",
       password: hashedPassword,
       role: "HOSTEL_ADMIN",
@@ -74,7 +74,7 @@ async function main() {
     where: { email: "gamma@hostel.com" },
     update: {},
     create: {
-      name: "Gamma Hostel Admin",
+      name: "Gamma Admin",
       email: "gamma@hostel.com",
       password: hashedPassword,
       role: "HOSTEL_ADMIN",
@@ -88,26 +88,26 @@ async function main() {
   // 3. ROOMS
   // -----------------------------------------------------
 
-  // Alpha (Male) → 40 rooms, 3 beds
-  for (let i = 1; i <= 40; i++) {
+  // Alpha (Girls) → 30 rooms, 3 beds
+  for (let i = 1; i <= 30; i++) {
     await prisma.room.create({
       data: {
         hostelId: alpha.id,
         roomNumber: i.toString().padStart(3, "0"),
         capacity: 3,
-        currentOccupancy: 0,
+        occupiedCount: 0,
       },
     });
   }
 
-  // Beta (Female) → 30 rooms, 3 beds
-  for (let i = 1; i <= 30; i++) {
+  // Beta (Boys) → 40 rooms, 3 beds
+  for (let i = 1; i <= 40; i++) {
     await prisma.room.create({
       data: {
         hostelId: beta.id,
         roomNumber: i.toString().padStart(3, "0"),
         capacity: 3,
-        currentOccupancy: 0,
+        occupiedCount: 0,
       },
     });
   }
@@ -119,7 +119,7 @@ async function main() {
         hostelId: gamma.id,
         roomNumber: i.toString().padStart(3, "0"),
         capacity: 2,
-        currentOccupancy: 0,
+        occupiedCount: 0,
       },
     });
   }
@@ -140,7 +140,6 @@ async function main() {
       branch: "Computer Science & Engineering",
       year: 2,
       gender: "MALE",
-      disciplineScore: 85,
     },
     {
       name: "Jane Smith",
@@ -149,9 +148,7 @@ async function main() {
       branch: "Electronics & Communication Engineering",
       year: 1,
       gender: "FEMALE",
-      disciplineScore: 92,
     },
-    // ... your other students here
   ];
 
   for (const s of students) {

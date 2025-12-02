@@ -7,7 +7,7 @@ const router = express.Router();
 // Student Registration
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, branch, year, gender } = req.body;
+    const { name, email, password, branch, year, gender, preference } = req.body;
     
     const hashedPassword = await hashPassword(password);
     
@@ -18,7 +18,8 @@ router.post('/register', async (req, res) => {
         password: hashedPassword,
         branch,
         year: parseInt(year),
-        gender
+        gender,
+        preferredHostel: preference
       }
     });
 

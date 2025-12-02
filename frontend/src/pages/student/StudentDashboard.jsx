@@ -198,16 +198,7 @@ export default function StudentDashboard() {
                 </button>
               }
             />
-            <ActionCard
-              title="Room Preferences"
-              description="Update your preferences"
-              icon={<SettingsIcon className="w-5 h-5" />}
-              action={
-                <button className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors">
-                  Edit
-                </button>
-              }
-            />
+
           </div>
         </div>
 
