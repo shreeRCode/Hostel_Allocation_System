@@ -1,49 +1,40 @@
-const express = require('express');
-const prisma = require('../config/prisma');
-const { authMiddleware, requireAdmin } = require('../middleware/authMiddleware');
-const allocationService = require('../services/allocationService');
+const express = require("express");
+const prisma = require("../config/prisma");
+const {
+  authMiddleware,
+  requireAdmin,
+} = require("../middleware/authMiddleware");
+const { runAllocation } = require("../services/allocationService"); // ✅ FIXED: Destructure import
 
 const router = express.Router();
 
-// Get All Allocations
-router.get('/', authMiddleware, requireAdmin, async (req, res) => {
+// GET ALLOCATIONS — ADMIN ONLY
+router.get("/", authMiddleware, requireAdmin, async (req, res) => {
   try {
     const allocations = await prisma.allocation.findMany({
-      where: { active: true },
-      include: {
-        student: { select: { name: true, email: true, branch: true, year: true } },
-        room: {
-          include: {
-            hostel: { select: { name: true } }
-          }
-        }
+      where: {
+        room: { hostelId: req.user.hostelId },
       },
-      orderBy: { allocatedAt: 'desc' }
+      include: {
+        student: true,
+        room: { include: { hostel: true } },
+      },
     });
 
     res.json({ allocations });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 
-// Run Allocation Algorithm
-router.post('/run', authMiddleware, requireAdmin, async (req, res) => {
+// RUN ALLOCATION — ADMIN ONLY
+router.post("/run", authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const result = await allocationService.allocateRooms();
-    res.json(result);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Get Hostel Occupancy
-router.get('/occupancy', authMiddleware, requireAdmin, async (req, res) => {
-  try {
-    const occupancy = await allocationService.getHostelOccupancy();
-    res.json({ occupancy });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+    const result = await runAllocation(); // ✅ Now works correctly
+    res.json({ success: true, message: result.message, result });
+  } catch (err) {
+    console.error("Allocation error:", err);
+    res.status(400).json({ error: err.message });
   }
 });
 

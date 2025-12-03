@@ -1,42 +1,44 @@
-const express = require('express');
-const prisma = require('../config/prisma');
-const { authMiddleware, requireStudent } = require('../middleware/authMiddleware');
+const express = require("express");
+const prisma = require("../config/prisma");
+const {
+  authMiddleware,
+  requireStudent,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Get Student Allocation
-router.get('/allocation', authMiddleware, requireStudent, async (req, res) => {
+// ================================
+// GET STUDENT'S OWN ALLOCATION
+// ================================
+router.get("/allocation", authMiddleware, requireStudent, async (req, res) => {
   try {
     const allocation = await prisma.allocation.findFirst({
-      where: { 
-        studentId: req.user.id,
-        active: true
-      },
+      where: { studentId: req.user.id, active: true },
       include: {
         room: {
-          include: {
-            hostel: true
-          }
-        }
-      }
+          include: { hostel: true },
+        },
+      },
     });
 
-    if (!allocation) {
-      return res.json({ allocation: null });
-    }
+    res.json({ allocation });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
-    res.json({
-      allocation: {
-        id: allocation.id,
-        hostelName: allocation.room.hostel.name,
-        roomNumber: allocation.room.roomNumber,
-        occupancy: allocation.room.occupiedCount,
-        capacity: allocation.room.capacity,
-        allocatedAt: allocation.allocatedAt.toISOString()
-      }
+// ================================
+// GET STUDENT PROFILE
+// ================================
+router.get("/profile", authMiddleware, requireStudent, async (req, res) => {
+  try {
+    const student = await prisma.student.findUnique({
+      where: { id: req.user.id },
     });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+
+    res.json({ student });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 

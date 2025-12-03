@@ -1,75 +1,42 @@
-const express = require('express');
-const prisma = require('../config/prisma');
-const { comparePassword, generateToken } = require('../utils/auth');
-const { authMiddleware, requireAdmin } = require('../middleware/authMiddleware');
+const express = require("express");
+const prisma = require("../config/prisma");
+const { comparePassword, generateToken } = require("../utils/auth");
 
 const router = express.Router();
 
-// Admin Login
-router.post('/auth/login', async (req, res) => {
+// ---------------------------
+// ADMIN LOGIN (FIXED)
+// ---------------------------
+router.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     const admin = await prisma.admin.findUnique({
-      where: { email }
+      where: { email },
+      include: { hostel: true },
     });
 
     if (!admin || !(await comparePassword(password, admin.password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const token = generateToken({ id: admin.id, role: 'ADMIN' });
-    
+    // 🔥 FORCE role to ADMIN for frontend compatibility
+    const token = generateToken({
+      id: admin.id,
+      role: "ADMIN", // ← FIXED
+      hostelId: admin.hostelId, // ← NEEDED FOR FILTERING
+    });
+
     res.json({
-      user: { id: admin.id, name: admin.name, role: 'ADMIN' },
-      token
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Get All Complaints (Admin)
-router.get('/complaints', authMiddleware, requireAdmin, async (req, res) => {
-  try {
-    const complaints = await prisma.complaint.findMany({
-      include: {
-        student: { select: { name: true } },
-        hostel: { select: { name: true } },
-        room: { select: { roomNumber: true } }
+      user: {
+        id: admin.id,
+        name: admin.name,
+        role: "ADMIN", // ← FIXED
+        hostelId: admin.hostelId,
+        hostelName: admin.hostel?.name,
       },
-      orderBy: { createdAt: 'desc' }
+      token,
     });
-
-    const formattedComplaints = complaints.map(complaint => ({
-      id: complaint.id,
-      studentName: complaint.student.name,
-      hostelName: complaint.hostel.name,
-      roomNumber: complaint.room?.roomNumber || 'N/A',
-      issue: complaint.issueType,
-      severity: complaint.severity,
-      status: complaint.status,
-      createdAt: complaint.createdAt.toISOString()
-    }));
-
-    res.json({ complaints: formattedComplaints });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Update Complaint Status (Admin)
-router.put('/complaints/:id', authMiddleware, requireAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const complaint = await prisma.complaint.update({
-      where: { id: parseInt(id) },
-      data: { status }
-    });
-
-    res.json({ message: 'Complaint updated successfully', complaint });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

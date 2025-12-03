@@ -1,24 +1,23 @@
-const express = require('express');
-const prisma = require('../config/prisma');
-const { authMiddleware } = require('../middleware/authMiddleware');
+const express = require("express");
+const prisma = require("../config/prisma");
+const {
+  authMiddleware,
+  requireAdmin,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Get All Hostels
-router.get('/', authMiddleware, async (req, res) => {
+// ADMIN SEES ONLY THEIR HOSTEL
+router.get("/", authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const hostels = await prisma.hostel.findMany({
-      include: {
-        rooms: true,
-        _count: {
-          select: { rooms: true }
-        }
-      }
+    const hostel = await prisma.hostel.findUnique({
+      where: { id: req.user.hostelId },
+      include: { rooms: true },
     });
 
-    res.json({ hostels });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.json({ hostels: [hostel] });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 

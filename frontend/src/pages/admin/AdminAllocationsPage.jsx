@@ -12,7 +12,7 @@ export default function AdminAllocationsPage() {
     setLoading(true);
     try {
       const data = await apiRequest("/allocation", { auth: true });
-      setAllocs(data?.allocations ?? []);
+      setAllocs(data?.allocations || []);
     } catch {
       setAllocs([]);
     } finally {
@@ -41,30 +41,30 @@ export default function AdminAllocationsPage() {
       <div className="space-y-5">
         <header className="flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-semibold text-slate-50">
-              Allocation Manager
+            <h1 className="text-xl text-white font-semibold">
+              My Hostel Allocations
             </h1>
             <p className="text-xs text-slate-400">
-              Run the allocation algorithm and view student-room mapping.
+              View and manage room allocation results.
             </p>
           </div>
 
           <button
-            onClick={runAllocation}
             disabled={running}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-xl"
+            onClick={runAllocation}
+            className="btn-primary"
           >
             {running ? "Running..." : "Run Allocation Algorithm"}
           </button>
         </header>
 
-        <Card title="All Allocations">
+        <Card title="Allocations">
           {loading ? (
             <p className="text-sm text-slate-400">Loading...</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full border-collapse text-sm">
-                <thead className="bg-slate-900/90 text-xs uppercase text-slate-400">
+                <thead className="bg-slate-900 text-xs uppercase text-slate-400">
                   <tr>
                     <th className="px-3 py-2">Student</th>
                     <th className="px-3 py-2">Hostel</th>
@@ -73,12 +73,12 @@ export default function AdminAllocationsPage() {
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-800 bg-slate-950/60">
+                <tbody className="divide-y divide-slate-800">
                   {allocs.map((a) => (
                     <tr key={a.id}>
-                      <td className="px-3 py-2">{a.student?.name || 'N/A'}</td>
-                      <td className="px-3 py-2">{a.room?.hostel?.name || 'N/A'}</td>
-                      <td className="px-3 py-2">{a.room?.roomNumber || 'N/A'}</td>
+                      <td className="px-3 py-2">{a.student?.name}</td>
+                      <td className="px-3 py-2">{a.room?.hostel?.name}</td>
+                      <td className="px-3 py-2">{a.room?.roomNumber}</td>
                       <td className="px-3 py-2">
                         {new Date(a.allocatedAt).toLocaleString()}
                       </td>

@@ -8,7 +8,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     gender: "",
-    preference: "",
+    preferredHostel: "", // ✅ FIXED: Changed from 'preference' to 'preferredHostel'
     branch: "",
     year: "",
   });
@@ -27,6 +27,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await registerStudent(form);
+      alert("Registration successful! Please login.");
       navigate("/login");
     } catch (err) {
       setError(err.message || "Registration failed");
@@ -39,11 +40,21 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
       <div className="w-full max-w-xl rounded-3xl border border-slate-800 bg-slate-950/90 p-7 shadow-2xl shadow-slate-950/70">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="mb-4 flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors duration-200 group"
         >
-          <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          <svg
+            className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           <span className="text-sm font-medium">Back to Home</span>
         </button>
@@ -124,21 +135,21 @@ export default function RegisterPage() {
                 Hostel Preference
               </label>
               <select
-                name="preference"
-                value={form.preference}
+                name="preferredHostel"
+                value={form.preferredHostel}
                 onChange={handleChange}
                 required
                 disabled={!form.gender}
                 className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-50"
               >
                 <option value="">Select Hostel</option>
-                {form.gender === 'MALE' && (
+                {form.gender === "MALE" && (
                   <>
                     <option value="Beta">Beta (Boys)</option>
                     <option value="Gamma">Gamma (Co-ed)</option>
                   </>
                 )}
-                {form.gender === 'FEMALE' && (
+                {form.gender === "FEMALE" && (
                   <>
                     <option value="Alpha">Alpha (Girls)</option>
                     <option value="Gamma">Gamma (Co-ed)</option>
@@ -162,20 +173,45 @@ export default function RegisterPage() {
                 className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-50 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
               >
                 <option value="">Select Department</option>
-                <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
-                <option value="Artificial Intelligence & Machine Learning">Artificial Intelligence & Machine Learning</option>
+                <option value="Artificial Intelligence & Data Science">
+                  Artificial Intelligence & Data Science
+                </option>
+                <option value="Artificial Intelligence & Machine Learning">
+                  Artificial Intelligence & Machine Learning
+                </option>
                 <option value="Biotechnology">Biotechnology</option>
                 <option value="Civil Engineering">Civil Engineering</option>
-                <option value="Computer & Communication Engineering">Computer & Communication Engineering</option>
-                <option value="Computer Science & Engineering">Computer Science & Engineering</option>
-                <option value="Computer Science & Engineering(Cyber Security)">Computer Science & Engineering(Cyber Security)</option>
-                <option value="Electrical & Electronics Engineering">Electrical & Electronics Engineering</option>
-                <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
-                <option value="Electronics Engineering (VLSI Design & Technology)">Electronics Engineering (VLSI Design & Technology)</option>
-                <option value="Electronics & Communication (Advanced Communication Technology)">Electronics & Communication (Advanced Communication Technology)</option>
-                <option value="Information Science & Engineering">Information Science & Engineering</option>
-                <option value="Mechanical Engineering">Mechanical Engineering</option>
-                <option value="Robotics & Artificial Intelligence">Robotics & Artificial Intelligence</option>
+                <option value="Computer & Communication Engineering">
+                  Computer & Communication Engineering
+                </option>
+                <option value="Computer Science & Engineering">
+                  Computer Science & Engineering
+                </option>
+                <option value="Computer Science & Engineering(Cyber Security)">
+                  Computer Science & Engineering(Cyber Security)
+                </option>
+                <option value="Electrical & Electronics Engineering">
+                  Electrical & Electronics Engineering
+                </option>
+                <option value="Electronics & Communication Engineering">
+                  Electronics & Communication Engineering
+                </option>
+                <option value="Electronics Engineering (VLSI Design & Technology)">
+                  Electronics Engineering (VLSI Design & Technology)
+                </option>
+                <option value="Electronics & Communication (Advanced Communication Technology)">
+                  Electronics & Communication (Advanced Communication
+                  Technology)
+                </option>
+                <option value="Information Science & Engineering">
+                  Information Science & Engineering
+                </option>
+                <option value="Mechanical Engineering">
+                  Mechanical Engineering
+                </option>
+                <option value="Robotics & Artificial Intelligence">
+                  Robotics & Artificial Intelligence
+                </option>
               </select>
             </div>
 
@@ -200,9 +236,7 @@ export default function RegisterPage() {
           </div>
 
           {error && (
-            <p className="text-xs font-medium text-rose-400">
-              {error}
-            </p>
+            <p className="text-xs font-medium text-rose-400">{error}</p>
           )}
 
           <button

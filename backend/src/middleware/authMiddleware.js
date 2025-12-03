@@ -1,10 +1,10 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+
   if (!token) {
-    return res.status(401).json({ error: 'Access denied. No token provided.' });
+    return res.status(401).json({ error: "Access denied. No token provided." });
   }
 
   try {
@@ -12,20 +12,24 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(400).json({ error: 'Invalid token.' });
+    res.status(400).json({ error: "Invalid token." });
   }
 };
 
 const requireStudent = (req, res, next) => {
-  if (req.user.role !== 'STUDENT') {
-    return res.status(403).json({ error: 'Access denied. Student role required.' });
+  if (req.user.role !== "STUDENT") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Student role required." });
   }
   next();
 };
 
 const requireAdmin = (req, res, next) => {
-  if (req.user.role !== 'ADMIN') {
-    return res.status(403).json({ error: 'Access denied. Admin role required.' });
+  if (req.user.role !== "HOSTEL_ADMIN" && req.user.role !== "ADMIN") {
+    return res
+      .status(403)
+      .json({ error: "Access denied. Admin role required." });
   }
   next();
 };

@@ -1,53 +1,63 @@
-const express = require('express');
-const prisma = require('../config/prisma');
-const { authMiddleware, requireStudent } = require('../middleware/authMiddleware');
+const express = require("express");
+const prisma = require("../config/prisma");
+const {
+  authMiddleware,
+  requireStudent,
+  requireAdmin,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Get Student's Complaints
-router.get('/my', authMiddleware, requireStudent, async (req, res) => {
+// ===============================================
+//  STUDENT: GET MY COMPLAINTS
+// ===============================================
+router.get("/my", authMiddleware, requireStudent, async (req, res) => {
   try {
     const complaints = await prisma.complaint.findMany({
       where: { studentId: req.user.id },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
 
-    const formattedComplaints = complaints.map(complaint => ({
-      id: complaint.id,
-      title: complaint.issueType,
-      description: complaint.description,
-      priority: complaint.severity,
-      category: complaint.category,
-      status: complaint.status,
-      createdAt: complaint.createdAt.toISOString(),
-      updatedAt: complaint.updatedAt.toISOString()
+    const formatted = complaints.map((c) => ({
+      id: c.id,
+      title: c.issueType,
+      description: c.description,
+      priority: c.severity,
+      category: c.category,
+      status: c.status,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
     }));
 
-    res.json({ complaints: formattedComplaints });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.json({ complaints: formatted });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
-// Create New Complaint
-router.post('/', authMiddleware, requireStudent, async (req, res) => {
+// ===============================================
+//  STUDENT: CREATE COMPLAINT
+// ===============================================
+router.post("/", authMiddleware, requireStudent, async (req, res) => {
   try {
     const { title, description, priority, category } = req.body;
-    
-    // Get student's allocation to find hostel and room
+
+    // Find the student's room
     const allocation = await prisma.allocation.findFirst({
-      where: { 
+      where: {
         studentId: req.user.id,
-        active: true
+        active: true,
       },
-      include: { room: true }
+      include: { room: true },
     });
 
     if (!allocation) {
-      return res.status(400).json({ error: 'No active allocation found' });
+      return res
+        .status(400)
+        .json({ error: "You are not allocated to any room." });
     }
 
-    const complaint = await prisma.complaint.create({
+    const created = await prisma.complaint.create({
       data: {
         issueType: title,
         description,
@@ -55,25 +65,89 @@ router.post('/', authMiddleware, requireStudent, async (req, res) => {
         category,
         studentId: req.user.id,
         hostelId: allocation.room.hostelId,
-        roomId: allocation.roomId
-      }
+        roomId: allocation.roomId,
+      },
     });
 
-    res.status(201).json({ 
-      message: 'Complaint created successfully',
-      complaint: {
-        id: complaint.id,
-        title: complaint.issueType,
-        description: complaint.description,
-        priority: complaint.severity,
-        category: complaint.category,
-        status: complaint.status,
-        createdAt: complaint.createdAt.toISOString(),
-        updatedAt: complaint.updatedAt.toISOString()
-      }
+    res.status(201).json({
+      message: "Complaint created successfully",
+      complaint: created,
     });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===============================================
+//  ADMIN: GET ALL COMPLAINTS FOR THEIR HOSTEL ONLY
+// ===============================================
+router.get("/", authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    const adminHostelId = req.user.hostelId;
+
+    if (!adminHostelId) {
+      return res
+        .status(403)
+        .json({ error: "Admin not assigned to any hostel." });
+    }
+
+    const complaints = await prisma.complaint.findMany({
+      where: { hostelId: adminHostelId },
+      include: {
+        student: { select: { id: true, name: true, email: true } },
+        room: { select: { roomNumber: true } },
+        hostel: { select: { name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // ✅ FIXED: Format to match frontend expectations
+    const formatted = complaints.map((c) => ({
+      id: c.id,
+      studentName: c.student?.name || "Unknown",
+      hostelName: c.hostel?.name || "Unknown",
+      roomNumber: c.room?.roomNumber || "N/A",
+      issueType: c.issueType,
+      description: c.description,
+      severity: c.severity,
+      status: c.status,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
+    }));
+
+    res.json({ complaints: formatted });
+  } catch (err) {
+    console.error("Complaint fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch complaints." });
+  }
+});
+
+// ===============================================
+//  ADMIN: UPDATE COMPLAINT STATUS
+// ===============================================
+router.put("/:id/status", authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const complaintId = parseInt(req.params.id);
+    const adminHostelId = req.user.hostelId;
+
+    // Ensure admin can update ONLY their hostel's complaints
+    const complaint = await prisma.complaint.findUnique({
+      where: { id: complaintId },
+    });
+
+    if (!complaint || complaint.hostelId !== adminHostelId) {
+      return res.status(403).json({ error: "Access denied." });
+    }
+
+    const updated = await prisma.complaint.update({
+      where: { id: complaintId },
+      data: { status },
+    });
+
+    res.json({ message: "Status updated successfully", complaint: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

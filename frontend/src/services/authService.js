@@ -1,19 +1,6 @@
 import { apiRequest } from "./apiClient";
 
-const TOKEN_KEY = "hostel_auth";
-
-export function getAuthToken() {
-  try {
-    const stored = localStorage.getItem(TOKEN_KEY);
-    if (!stored) return null;
-    const parsed = JSON.parse(stored);
-    return parsed.token;
-  } catch {
-    return null;
-  }
-}
-
-// STUDENT
+// ✅ FIXED: Student login uses /auth/login (not /student/auth/login)
 export function loginStudent(credentials) {
   return apiRequest("/auth/login", {
     method: "POST",
@@ -21,6 +8,7 @@ export function loginStudent(credentials) {
   });
 }
 
+// ✅ FIXED: Student registration uses /auth/register (not /student/auth/register)
 export function registerStudent(payload) {
   return apiRequest("/auth/register", {
     method: "POST",
@@ -28,7 +16,7 @@ export function registerStudent(payload) {
   });
 }
 
-// ADMIN
+// ✅ CORRECT: Admin login uses /admin/auth/login
 export function loginAdmin(credentials) {
   return apiRequest("/admin/auth/login", {
     method: "POST",

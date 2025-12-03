@@ -11,9 +11,11 @@ export default function AdminComplaintsPage() {
   const fetchComplaints = async () => {
     setLoading(true);
     try {
-      const data = await apiRequest("/admin/complaints", { auth: true });
+      // ✅ FIXED: Use /complaints (not /admin/complaints)
+      const data = await apiRequest("/complaints", { auth: true });
       setComplaints(data?.complaints ?? []);
-    } catch {
+    } catch (err) {
+      console.error("Failed to fetch complaints:", err);
       setComplaints([]);
     } finally {
       setLoading(false);
@@ -26,7 +28,8 @@ export default function AdminComplaintsPage() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      await apiRequest(`/admin/complaints/${id}`, {
+      // ✅ FIXED: Correct path for updating status
+      await apiRequest(`/complaints/${id}/status`, {
         method: "PUT",
         auth: true,
         body: { status: newStatus },

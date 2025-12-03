@@ -1,155 +1,109 @@
-// import { Routes, Route, Navigate } from "react-router-dom";
-// import { useAuth } from "./context/AuthContext";
-
-// import LoginPage from "./pages/auth/LoginPage.jsx";
-// import RegisterPage from "./pages/auth/RegisterPage.jsx";
-
-// import StudentDashboard from "./pages/student/StudentDashboard.jsx";
-// import StudentComplaintsPage from "./pages/student/StudentComplaintsPage.jsx";
-
-// import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
-// import AdminComplaintsPage from "./pages/admin/AdminComplaintsPage.jsx";
-// import AdminHostelsPage from "./pages/admin/AdminHostelsPage.jsx";
-// import AdminRoomsPage from "./pages/admin/AdminRoomsPage.jsx";
-// import AdminAllocationsPage from "./pages/admin/AdminAllocationsPage.jsx";
-
-// import { ROLES } from "./utils/constants";
-
-// function ProtectedRoute({ children, allowedRoles }) {
-//   const { user, loading } = useAuth();
-
-//   if (loading) return null; // Add spinner if needed
-
-//   if (!user) return <Navigate to="/login" replace />;
-
-//   if (allowedRoles && !allowedRoles.includes(user.role)) {
-//     return <Navigate to="/login" replace />;
-//   }
-
-//   return children;
-// }
-
-// export default function App() {
-//   return (
-//     <Routes>
-//       {/* Default → Login */}
-//       <Route path="/" element={<Navigate to="/login" replace />} />
-
-//       {/* Auth Routes */}
-//       <Route path="/login" element={<LoginPage />} />
-//       <Route path="/register" element={<RegisterPage />} />
-
-//       {/* Student Routes */}
-//       <Route
-//         path="/student"
-//         element={
-//           <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-//             <StudentDashboard />
-//           </ProtectedRoute>
-//         }
-//       />
-
-//       <Route
-//         path="/student/complaints"
-//         element={
-//           <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-//             <StudentComplaintsPage />
-//           </ProtectedRoute>
-//         }
-//       />
-
-//       {/* Admin Routes */}
-//       <Route
-//         path="/admin"
-//         element={
-//           <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-//             <AdminDashboard />
-//           </ProtectedRoute>
-//         }
-//       />
-
-//       <Route
-//         path="/admin/complaints"
-//         element={
-//           <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-//             <AdminComplaintsPage />
-//           </ProtectedRoute>
-//         }
-//       />
-
-//       <Route
-//         path="/admin/hostels"
-//         element={
-//           <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-//             <AdminHostelsPage />
-//           </ProtectedRoute>
-//         }
-//       />
-
-//       <Route
-//         path="/admin/hostels/:hostelId/rooms"
-//         element={
-//           <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-//             <AdminRoomsPage />
-//           </ProtectedRoute>
-//         }
-//       />
-
-//       <Route
-//         path="/admin/allocations"
-//         element={
-//           <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-//             <AdminAllocationsPage />
-//           </ProtectedRoute>
-//         }
-//       />
-
-//       {/* Catch-all */}
-//       <Route path="*" element={<Navigate to="/login" replace />} />
-//     </Routes>
-//   );
-// }
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
-import HomePage from "./pages/HomePage.jsx";
-import LoginPage from "./pages/auth/LoginPage.jsx";
-import RegisterPage from "./pages/auth/RegisterPage.jsx";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
 
-import StudentDashboard from "./pages/student/StudentDashboard.jsx";
-import StudentComplaintsPage from "./pages/student/StudentComplaintsPage.jsx";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminAllocationsPage from "./pages/admin/AdminAllocationsPage";
+import AdminHostelsPage from "./pages/admin/AdminHostelsPage";
+import AdminComplaintsPage from "./pages/admin/AdminComplaintsPage";
 
-import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
-import AdminComplaintsPage from "./pages/admin/AdminComplaintsPage.jsx";
-import AdminHostelsPage from "./pages/admin/AdminHostelsPage.jsx";
-import AdminRoomsPage from "./pages/admin/AdminRoomsPage.jsx";
-import AdminAllocationsPage from "./pages/admin/AdminAllocationsPage.jsx";
+import StudentDashboard from "./pages/student/StudentDashboard";
+import StudentComplaintsPage from "./pages/student/StudentComplaintsPage";
 
 export default function App() {
+  const { user, loading } = useAuth();
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <Routes>
-      {/* Home page */}
+      {/* 🏠 HOME PAGE - THIS WAS MISSING! */}
       <Route path="/" element={<HomePage />} />
 
-      {/* Auth */}
+      {/* PUBLIC ROUTES */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* STUDENT PAGES (NO PROTECTION) */}
-      <Route path="/student" element={<StudentDashboard />} />
-      <Route path="/student/complaints" element={<StudentComplaintsPage />} />
-
-      {/* ADMIN PAGES (NO PROTECTION) */}
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/complaints" element={<AdminComplaintsPage />} />
-      <Route path="/admin/hostels" element={<AdminHostelsPage />} />
+      {/* ADMIN ROUTES */}
       <Route
-        path="/admin/hostels/:hostelId/rooms"
-        element={<AdminRoomsPage />}
+        path="/admin"
+        element={
+          user?.role === "ADMIN" ? (
+            <AdminDashboard />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
       />
-      <Route path="/admin/allocations" element={<AdminAllocationsPage />} />
 
-      {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route
+        path="/admin/allocations"
+        element={
+          user?.role === "ADMIN" ? (
+            <AdminAllocationsPage />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/admin/hostels"
+        element={
+          user?.role === "ADMIN" ? (
+            <AdminHostelsPage />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/admin/complaints"
+        element={
+          user?.role === "ADMIN" ? (
+            <AdminComplaintsPage />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      {/* STUDENT ROUTES */}
+      <Route
+        path="/student"
+        element={
+          user?.role === "STUDENT" ? (
+            <StudentDashboard />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/student/complaints"
+        element={
+          user?.role === "STUDENT" ? (
+            <StudentComplaintsPage />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      {/* 404 - Redirect unknown routes to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
