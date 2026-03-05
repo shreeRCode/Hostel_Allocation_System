@@ -4,10 +4,11 @@ import { useAuth } from "./context/AuthContext";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import AdminRoomsPage from "./pages/admin/AdminRoomsPage";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminAllocationsPage from "./pages/admin/AdminAllocationsPage";
-import AdminHostelsPage from "./pages/admin/AdminHostelsPage";
+
 import AdminComplaintsPage from "./pages/admin/AdminComplaintsPage";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
@@ -56,18 +57,16 @@ export default function App() {
           )
         }
       />
-
       <Route
-        path="/admin/hostels"
+        path="/admin/rooms"
         element={
           user?.role === "ADMIN" ? (
-            <AdminHostelsPage />
+            <AdminRoomsPage />
           ) : (
             <Navigate to="/login" replace />
           )
         }
       />
-
       <Route
         path="/admin/complaints"
         element={

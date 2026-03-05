@@ -13,7 +13,10 @@ const router = express.Router();
 router.get("/allocation", authMiddleware, requireStudent, async (req, res) => {
   try {
     const allocation = await prisma.allocation.findFirst({
-      where: { studentId: req.user.id, active: true },
+      where: {
+        studentId: req.user.id,
+        active: true,
+      },
       include: {
         room: {
           include: { hostel: true },
@@ -21,7 +24,19 @@ router.get("/allocation", authMiddleware, requireStudent, async (req, res) => {
       },
     });
 
-    res.json({ allocation });
+    if (!allocation) {
+      return res.json({ allocation: null });
+    }
+
+    res.json({
+      allocation: {
+        hostelName: allocation.room.hostel.name,
+        roomNumber: allocation.room.roomNumber,
+        occupancy: allocation.room.occupiedCount,
+        capacity: allocation.room.capacity,
+        allocatedAt: allocation.allocatedAt,
+      },
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

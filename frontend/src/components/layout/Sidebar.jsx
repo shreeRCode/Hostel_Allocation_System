@@ -1,56 +1,79 @@
 import { NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { ROLES } from "../../utils/constants";
 import { useAuth } from "../../context/AuthContext";
+import { apiRequest } from "../../services/apiClient";
 import { NotificationBadge } from "../common/StatusBadge";
-import { DashboardIcon, ComplaintsIcon, HostelsIcon, AllocationsIcon, UserIcon } from "../common/Icons";
+import {
+  DashboardIcon,
+  ComplaintsIcon,
+  HostelsIcon,
+  AllocationsIcon,
+  UserIcon,
+} from "../common/Icons";
 
 export default function Sidebar() {
   const { user } = useAuth();
+  const [complaintCount, setComplaintCount] = useState(0);
+
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      try {
+        const endpoint =
+          user?.role === "ADMIN" ? "/complaints" : "/complaints/my";
+
+        const data = await apiRequest(endpoint, { auth: true });
+        setComplaintCount(data?.complaints?.length || 0);
+      } catch (err) {
+        console.error("Failed to fetch complaints");
+      }
+    };
+
+    fetchComplaints();
+  }, []);
 
   const studentLinks = [
-    { 
-      name: "Dashboard", 
-      path: "/student", 
+    {
+      name: "Dashboard",
+      path: "/student",
       icon: <DashboardIcon />,
-      description: "Overview & Analytics"
+      description: "Overview & Analytics",
     },
-    { 
-      name: "My Complaints", 
-      path: "/student/complaints", 
+    {
+      name: "My Complaints",
+      path: "/student/complaints",
       icon: <ComplaintsIcon />,
       description: "Issue Management",
-      badge: 2
+      badge: complaintCount,
     },
   ];
-
   const adminLinks = [
-    { 
-      name: "Dashboard", 
-      path: "/admin", 
+    {
+      name: "Dashboard",
+      path: "/admin",
       icon: <DashboardIcon />,
-      description: "System Overview"
+      description: "System Overview",
     },
-    { 
-      name: "Complaints", 
-      path: "/admin/complaints", 
+    {
+      name: "Complaints",
+      path: "/admin/complaints",
       icon: <ComplaintsIcon />,
       description: "Issue Resolution",
-      badge: 5
+      badge: complaintCount,
     },
-    { 
-      name: "Hostels", 
-      path: "/admin/hostels", 
+    {
+      name: "Rooms",
+      path: "/admin/rooms",
       icon: <HostelsIcon />,
-      description: "Facility Management"
+      description: "Room Management",
     },
-    { 
-      name: "Allocations", 
-      path: "/admin/allocations", 
+    {
+      name: "Allocations",
+      path: "/admin/allocations",
       icon: <AllocationsIcon />,
-      description: "Room Assignments"
+      description: "Room Assignments",
     },
   ];
-
   const links = user?.role === ROLES.ADMIN ? adminLinks : studentLinks;
 
   return (
@@ -84,17 +107,30 @@ export default function Sidebar() {
           >
             {({ isActive }) => (
               <>
-                <div className={`${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`}>
+                <div
+                  className={`${
+                    isActive
+                      ? "text-white"
+                      : "text-slate-400 group-hover:text-slate-300"
+                  }`}
+                >
                   {link.icon}
                 </div>
+
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{link.name}</span>
-                    {link.badge && <NotificationBadge count={link.badge} />}
+
+                    {link.badge > 0 && <NotificationBadge count={link.badge} />}
                   </div>
-                  <p className={`text-xs transition-colors ${
-                    isActive ? 'text-indigo-100' : 'text-slate-500 group-hover:text-slate-400'
-                  }`}>
+
+                  <p
+                    className={`text-xs transition-colors ${
+                      isActive
+                        ? "text-indigo-100"
+                        : "text-slate-500 group-hover:text-slate-400"
+                    }`}
+                  >
                     {link.description}
                   </p>
                 </div>
@@ -110,12 +146,13 @@ export default function Sidebar() {
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
             <UserIcon className="w-5 h-5 text-white" />
           </div>
+
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">
-              {user?.name || 'User'}
+              {user?.name || "User"}
             </p>
             <p className="text-xs text-slate-400 capitalize">
-              {user?.role?.toLowerCase() || 'Student'} Account
+              {user?.role?.toLowerCase() || "Student"} Account
             </p>
           </div>
         </div>

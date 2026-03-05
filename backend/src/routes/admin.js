@@ -41,5 +41,17 @@ router.post("/auth/login", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+// ================================
+// ADMIN: GET ALL STUDENTS
+// ================================
+router.get("/students", async (req, res) => {
+  try {
+    const students = await prisma.student.findMany();
+
+    res.json({ students });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
 module.exports = router;
