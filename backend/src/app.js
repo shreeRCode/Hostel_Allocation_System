@@ -19,11 +19,9 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", process.env.FRONTEND_URL],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 app.use(express.json());
 
@@ -46,7 +44,7 @@ try {
       customCss: ".swagger-ui .topbar { display: none }",
       customSiteTitle: "Hostel Management API",
       explorer: true,
-    })
+    }),
   );
   console.log("📚 Swagger UI available at /api-docs");
 } catch (error) {
