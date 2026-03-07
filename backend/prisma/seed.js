@@ -129,43 +129,6 @@ async function main() {
   // -----------------------------------------------------
   // 4. SAMPLE STUDENTS
   // -----------------------------------------------------
-  console.log("🎓 Creating sample students...");
-
-  const hashedStudentPassword = await bcrypt.hash("Student@123", 10);
-
-  await prisma.student.createMany({
-    data: [
-      {
-        name: "John Doe",
-        email: "john@student.com",
-        password: hashedStudentPassword,
-        branch: "CSE",
-        year: 2,
-        gender: "MALE",
-        preferredHostel: "Beta",
-      },
-      {
-        name: "Jane Smith",
-        email: "jane@student.com",
-        password: hashedStudentPassword,
-        branch: "ECE",
-        year: 1,
-        gender: "FEMALE",
-        preferredHostel: "Alpha",
-      },
-      {
-        name: "Asha Rao",
-        email: "asha@student.com",
-        password: hashedStudentPassword,
-        branch: "CSE",
-        year: 3,
-        gender: "FEMALE",
-        preferredHostel: "Gamma",
-      },
-    ],
-  });
-
-  console.log("✅ Sample students added");
 
   console.log("🎉 SEED COMPLETED!");
 }
