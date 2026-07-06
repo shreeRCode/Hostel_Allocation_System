@@ -6,13 +6,16 @@ import { apiRequest } from "../../services/apiClient";
 export default function AdminRoomsPage() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchRooms = async () => {
     setLoading(true);
+    setError("");
     try {
       const data = await apiRequest("/rooms", { auth: true });
       setRooms(data?.rooms || []);
-    } catch {
+    } catch (err) {
+      setError(err.message || "Failed to load rooms.");
       setRooms([]);
     } finally {
       setLoading(false);
@@ -32,6 +35,12 @@ export default function AdminRoomsPage() {
             View room capacity and occupancy.
           </p>
         </header>
+
+        {error && (
+          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+            <p className="text-sm text-red-400">{error}</p>
+          </div>
+        )}
 
         <Card title="Hostel Rooms">
           {loading ? (

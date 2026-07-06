@@ -7,15 +7,18 @@ import { apiRequest } from "../../services/apiClient";
 export default function AdminComplaintsPage() {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchComplaints = async () => {
     setLoading(true);
+    setError("");
     try {
       // ✅ FIXED: Use /complaints (not /admin/complaints)
       const data = await apiRequest("/complaints", { auth: true });
       setComplaints(data?.complaints ?? []);
     } catch (err) {
       console.error("Failed to fetch complaints:", err);
+      setError(err.message || "Failed to load complaints.");
       setComplaints([]);
     } finally {
       setLoading(false);
@@ -59,6 +62,12 @@ export default function AdminComplaintsPage() {
             red.
           </p>
         </header>
+
+        {error && (
+          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+            <p className="text-sm text-red-400">{error}</p>
+          </div>
+        )}
 
         <Card title="All Complaints" subtitle="Sorted by latest first">
           {loading ? (

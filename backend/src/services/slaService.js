@@ -1,14 +1,18 @@
 const prisma = require("../config/prisma");
 
-// SLA times in HOURS
+// SLA times in HOURS.
+// Keys are the UPPERCASED versions of the categories the complaint form
+// actually submits (see COMPLAINT_CATEGORIES on the frontend). Keep these in
+// sync so escalation doesn't silently fall back to the default for every issue.
 const SLA_HOURS = {
-  ELECTRICITY: 6,
-  WATER: 12,
-  INTERNET: 24,
-  WIFI: 24,
+  ELECTRICAL: 6,
   PLUMBING: 12,
-  CLEANING: 48,
+  HVAC: 24,
+  NETWORK: 24,
+  CLEANLINESS: 48,
+  SECURITY: 6,
   FURNITURE: 48,
+  MAINTENANCE: 24,
   OTHER: 24,
 };
 

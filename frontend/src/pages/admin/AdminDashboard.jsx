@@ -21,6 +21,7 @@ export default function AdminDashboard() {
 
   const [recentAllocations, setRecentAllocations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showAllocationModal, setShowAllocationModal] = useState(false);
   const [allocationRunning, setAllocationRunning] = useState(false);
 
@@ -31,10 +32,14 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+      setError("");
 
-      const studentsData = await apiRequest("/admin/students", { auth: true });
-      const allocationsData = await apiRequest("/allocation", { auth: true });
-      const roomsData = await apiRequest("/rooms", { auth: true });
+      // Fetch in parallel instead of three serial round-trips.
+      const [studentsData, allocationsData, roomsData] = await Promise.all([
+        apiRequest("/admin/students", { auth: true }),
+        apiRequest("/allocation", { auth: true }),
+        apiRequest("/rooms", { auth: true }),
+      ]);
 
       const students = studentsData?.students || [];
       const allocations = allocationsData?.allocations || [];
@@ -53,6 +58,7 @@ export default function AdminDashboard() {
       setRecentAllocations(allocations.slice(0, 5));
     } catch (err) {
       console.error("Dashboard fetch failed:", err);
+      setError(err.message || "Failed to load dashboard data.");
     } finally {
       setLoading(false);
     }
@@ -119,6 +125,13 @@ export default function AdminDashboard() {
             Manage hostel rooms and student allocations.
           </p>
         </div>
+
+        {/* ERROR BANNER */}
+        {error && (
+          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+            <p className="text-sm text-red-400">{error}</p>
+          </div>
+        )}
 
         {/* STATS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

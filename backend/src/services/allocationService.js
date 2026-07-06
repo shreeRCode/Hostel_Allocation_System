@@ -22,6 +22,25 @@ async function runAllocation() {
     },
   });
 
+  // Load every room ONCE and index by hostel name, instead of re-querying the
+  // DB for each student (previously an N+1 query pattern). We track occupancy
+  // in memory so students allocated earlier in this run correctly fill rooms
+  // before we consider them full.
+  const allRooms = await prisma.room.findMany({ include: { hostel: true } });
+  const roomsByHostel = new Map();
+  for (const room of allRooms) {
+    const key = room.hostel?.name;
+    if (!key) continue;
+    if (!roomsByHostel.has(key)) roomsByHostel.set(key, []);
+    roomsByHostel.get(key).push(room);
+  }
+
+  const findOpenRoom = (hostelName) => {
+    const rooms = roomsByHostel.get(hostelName);
+    if (!rooms) return null;
+    return rooms.find((r) => r.occupiedCount < r.capacity) || null;
+  };
+
   let allocated = 0;
 
   for (const s of students) {
@@ -30,44 +49,14 @@ async function runAllocation() {
 
     const fallback = getFallback(s.gender, primary);
 
-    let room = null;
-
-    // -------------------------------------
-    // Try PRIMARY hostel
-    // -------------------------------------
-    const primaryRooms = await prisma.room.findMany({
-      where: {
-        hostel: {
-          is: { name: primary },
-        },
-      },
-      include: { hostel: true },
-    });
-
-    room = primaryRooms.find((r) => r.occupiedCount < r.capacity);
-
-    // -------------------------------------
-    // Try FALLBACK hostel
-    // -------------------------------------
+    let room = findOpenRoom(primary);
     if (!room && fallback) {
-      const fallbackRooms = await prisma.room.findMany({
-        where: {
-          hostel: {
-            is: { name: fallback },
-          },
-        },
-        include: { hostel: true },
-      });
-
-      room = fallbackRooms.find((r) => r.occupiedCount < r.capacity);
+      room = findOpenRoom(fallback);
     }
 
     // No room available
     if (!room) continue;
 
-    // -------------------------------------
-    // Transaction
-    // -------------------------------------
     await prisma.$transaction(async (tx) => {
       await tx.allocation.create({
         data: {
@@ -85,6 +74,8 @@ async function runAllocation() {
       });
     });
 
+    // Reflect the new occupancy in our in-memory copy for the rest of the run.
+    room.occupiedCount += 1;
     allocated++;
   }
 

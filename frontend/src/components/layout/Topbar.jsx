@@ -28,7 +28,8 @@ export default function Topbar({ onToggleSidebar }) {
       <div className="flex items-center gap-4">
         <button
           onClick={onToggleSidebar}
-          className="text-slate-400 hover:text-white text-lg"
+          className="md:hidden text-slate-400 hover:text-white text-lg"
+          aria-label="Toggle menu"
         >
           ☰
         </button>

@@ -3,23 +3,27 @@ import Topbar from "./Topbar";
 import { useState } from "react";
 
 export default function AppLayout({ children }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // On desktop the sidebar is always visible; on mobile it's an off-canvas
+  // drawer toggled by the hamburger in the Topbar.
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 overflow-hidden">
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Sidebar */}
-      <div
-        className={`transition-all duration-300 ${
-          sidebarCollapsed ? "w-16" : "w-64"
-        }`}
-      >
-        <Sidebar collapsed={sidebarCollapsed} />
-      </div>
+      <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-        />
+        <Topbar onToggleSidebar={() => setMobileOpen((v) => !v)} />
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto">

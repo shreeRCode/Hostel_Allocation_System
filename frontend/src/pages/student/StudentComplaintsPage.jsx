@@ -5,6 +5,7 @@ import StatusBadge, { PriorityBadge } from "../../components/common/StatusBadge"
 import Table from "../../components/common/Table";
 import Modal from "../../components/common/Modal";
 import { apiRequest } from "../../services/apiClient";
+import { COMPLAINT_CATEGORIES } from "../../utils/constants";
 import { ComplaintsIcon, PlusIcon, ViewIcon, EditIcon, RefreshIcon } from "../../components/common/Icons";
 
 export default function StudentComplaintsPage() {
@@ -20,10 +21,7 @@ export default function StudentComplaintsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
 
-  const categories = [
-    "Plumbing", "Electrical", "HVAC", "Network", "Cleanliness", 
-    "Security", "Furniture", "Maintenance", "Other"
-  ];
+  const categories = COMPLAINT_CATEGORIES;
 
   useEffect(() => {
     fetchComplaints();
@@ -52,24 +50,24 @@ export default function StudentComplaintsPage() {
     setSubmitting(true);
     
     try {
-      const response = await apiRequest("/complaints", {
+      await apiRequest("/complaints", {
         method: "POST",
         body: form,
         auth: true,
       });
-      
-      // Add new complaint to the list
-      if (response.complaint) {
-        setComplaints(prev => [response.complaint, ...prev]);
-      }
-      
+
       // Reset form and close modal
       setForm({ title: "", description: "", priority: "MEDIUM", category: "" });
       setShowCreateModal(false);
-      
+
+      // Re-fetch so the new row shows the same display shape as the rest of the
+      // table (the create response returns the raw DB record, not the formatted
+      // one, which previously rendered a blank row until manual refresh).
+      await fetchComplaints();
+
       // Show success message
       alert("Complaint submitted successfully!");
-      
+
     } catch (err) {
       alert(err.message || "Failed to submit complaint");
     } finally {

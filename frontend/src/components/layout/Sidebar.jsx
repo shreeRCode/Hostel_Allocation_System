@@ -12,11 +12,13 @@ import {
   UserIcon,
 } from "../common/Icons";
 
-export default function Sidebar() {
+export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
   const { user } = useAuth();
   const [complaintCount, setComplaintCount] = useState(0);
 
   useEffect(() => {
+    if (!user?.role) return;
+
     const fetchComplaints = async () => {
       try {
         const endpoint =
@@ -24,13 +26,13 @@ export default function Sidebar() {
 
         const data = await apiRequest(endpoint, { auth: true });
         setComplaintCount(data?.complaints?.length || 0);
-      } catch (err) {
+      } catch {
         console.error("Failed to fetch complaints");
       }
     };
 
     fetchComplaints();
-  }, []);
+  }, [user?.role]);
 
   const studentLinks = [
     {
@@ -77,17 +79,31 @@ export default function Sidebar() {
   const links = user?.role === ROLES.ADMIN ? adminLinks : studentLinks;
 
   return (
-    <aside className="w-64 h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border-r border-slate-800/50 flex flex-col">
+    <aside
+      className={`fixed md:static inset-y-0 left-0 z-50 w-64 h-screen shrink-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border-r border-slate-800/50 flex flex-col transform transition-transform duration-300 md:translate-x-0 ${
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
       {/* Header */}
       <div className="p-6 border-b border-slate-800/50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">HMS</span>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <span className="text-white font-bold text-lg">HMS</span>
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-white">Hostel Management</h1>
+              <p className="text-xs text-slate-400">Enterprise System</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">Hostel Management</h1>
-            <p className="text-xs text-slate-400">Enterprise System</p>
-          </div>
+          {/* Close button — mobile only */}
+          <button
+            onClick={onClose}
+            className="md:hidden text-slate-400 hover:text-white text-xl leading-none"
+            aria-label="Close menu"
+          >
+            ✕
+          </button>
         </div>
       </div>
 
@@ -97,6 +113,7 @@ export default function Sidebar() {
           <NavLink
             key={link.path}
             to={link.path}
+            onClick={onClose}
             className={({ isActive }) =>
               `group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 isActive

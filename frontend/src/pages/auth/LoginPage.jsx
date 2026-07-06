@@ -35,13 +35,7 @@ export default function LoginPage() {
 
       console.log("Login response:", data);
 
-      // ⭐ Store Admin Session (hostelId + hostelName)
-      if (role === ROLES.ADMIN) {
-        const { saveAdminSession } = await import("../../utils/session");
-        saveAdminSession(data.user, data.token);
-      }
-
-      // Save normal login session
+      // Save login session (hostelId/role are already persisted by `login`).
       login(
         {
           ...data.user,

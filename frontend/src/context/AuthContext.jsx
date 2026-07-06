@@ -42,6 +42,11 @@ export function AuthProvider({ children }) {
     setUser(null);
     setToken(null);
     localStorage.removeItem(STORAGE_KEY);
+    // Clear any legacy admin-session keys so nothing lingers after logout.
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("hostelId");
+    localStorage.removeItem("hostelName");
   };
 
   return (

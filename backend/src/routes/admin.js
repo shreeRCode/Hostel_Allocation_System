@@ -1,6 +1,11 @@
 const express = require("express");
 const prisma = require("../config/prisma");
 const { comparePassword, generateToken } = require("../utils/auth");
+const { STUDENT_SELECT } = require("../utils/sanitize");
+const {
+  authMiddleware,
+  requireAdmin,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -10,6 +15,12 @@ const router = express.Router();
 router.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Email and password are required." });
+    }
 
     const admin = await prisma.admin.findUnique({
       where: { email },
@@ -38,19 +49,24 @@ router.post("/auth/login", async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error("Admin login error:", error);
+    res.status(500).json({ error: "Login failed. Please try again." });
   }
 });
 // ================================
 // ADMIN: GET ALL STUDENTS
+// (auth + admin only; never returns password hashes)
 // ================================
-router.get("/students", async (req, res) => {
+router.get("/students", authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const students = await prisma.student.findMany();
+    const students = await prisma.student.findMany({
+      select: STUDENT_SELECT,
+      orderBy: { createdAt: "desc" },
+    });
 
     res.json({ students });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: "Failed to fetch students." });
   }
 });
 

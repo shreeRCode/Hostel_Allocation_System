@@ -12,7 +12,9 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(400).json({ error: "Invalid token." });
+    // 401 (not 400) so the client can detect an expired/invalid session
+    // and redirect to login.
+    res.status(401).json({ error: "Invalid or expired token." });
   }
 };
 

@@ -4,6 +4,7 @@ const {
   authMiddleware,
   requireStudent,
 } = require("../middleware/authMiddleware");
+const { STUDENT_SELECT } = require("../utils/sanitize");
 
 const router = express.Router();
 
@@ -49,6 +50,7 @@ router.get("/profile", authMiddleware, requireStudent, async (req, res) => {
   try {
     const student = await prisma.student.findUnique({
       where: { id: req.user.id },
+      select: STUDENT_SELECT,
     });
 
     res.json({ student });

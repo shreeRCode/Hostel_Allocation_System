@@ -7,13 +7,16 @@ export default function AdminAllocationsPage() {
   const [allocs, setAllocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [error, setError] = useState("");
 
   const fetchAllocations = async () => {
     setLoading(true);
+    setError("");
     try {
       const data = await apiRequest("/allocation", { auth: true });
       setAllocs(data?.allocations || []);
-    } catch {
+    } catch (err) {
+      setError(err.message || "Failed to load allocations.");
       setAllocs([]);
     } finally {
       setLoading(false);
@@ -57,6 +60,12 @@ export default function AdminAllocationsPage() {
             {running ? "Running..." : "Run Allocation Algorithm"}
           </button>
         </header>
+
+        {error && (
+          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+            <p className="text-sm text-red-400">{error}</p>
+          </div>
+        )}
 
         <Card title="Allocations">
           {loading ? (

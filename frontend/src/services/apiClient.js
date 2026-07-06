@@ -34,6 +34,20 @@ export async function apiRequest(path, options = {}) {
     // ✅ FIXED: Read response body ONCE as text first
     const responseText = await res.text();
 
+    // Session expired / invalid token: clear stored auth and send the user
+    // back to login instead of leaving them in a broken "logged in" state.
+    if (res.status === 401 && options.auth) {
+      localStorage.removeItem("hostel_auth");
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("hostelId");
+      localStorage.removeItem("hostelName");
+      if (window.location.pathname !== "/login") {
+        window.location.assign("/login");
+      }
+      throw new Error("Your session has expired. Please sign in again.");
+    }
+
     if (!res.ok) {
       let errorMsg = "Request failed";
 
