@@ -9,7 +9,8 @@ export default function Table({
   pagination = true,
   pageSize = 10,
   loading = false,
-  emptyMessage = "No data available"
+  emptyMessage = "No data available",
+  rowClassName = () => ""
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -137,7 +138,7 @@ export default function Table({
               paginatedData.map((item, index) => (
                 <tr
                   key={item.id || index}
-                  className="hover:bg-slate-800/30 transition-colors"
+                  className={`hover:bg-slate-800/30 transition-colors ${rowClassName(item)}`}
                 >
                   {columns.map((column) => (
                     <td key={column.key} className="px-4 py-3 text-sm text-slate-300">

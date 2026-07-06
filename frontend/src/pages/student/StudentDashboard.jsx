@@ -49,8 +49,11 @@ export default function StudentDashboard() {
     (c) => c.status === "PENDING" || c.status === "IN_PROGRESS"
   ).length;
 
+  // Counts both RESOLVED (admin fixed it) and CLOSED (you confirmed it) —
+  // otherwise confirming a fix would make this number drop, which reads as
+  // a regression rather than progress.
   const resolvedComplaints = recentComplaints.filter(
-    (c) => c.status === "RESOLVED"
+    (c) => c.status === "RESOLVED" || c.status === "CLOSED"
   ).length;
 
   const escalatedComplaints = recentComplaints.filter(
@@ -214,7 +217,11 @@ export default function StudentDashboard() {
           ) : recentComplaints.length > 0 ? (
             <div className="space-y-3">
               {recentComplaints.slice(0, 5).map((complaint, index) => (
-                <ComplaintItem key={index} complaint={complaint} />
+                <ComplaintItem
+                  key={index}
+                  complaint={complaint}
+                  onView={handleViewComplaints}
+                />
               ))}
               {recentComplaints.length > 5 && (
                 <div className="text-center pt-4">
@@ -262,7 +269,7 @@ function InfoBlock({ label, value, extra, highlight = false }) {
   );
 }
 
-function ComplaintItem({ complaint }) {
+function ComplaintItem({ complaint, onView }) {
   return (
     <div className="flex items-center justify-between p-4 rounded-xl bg-slate-800/30 hover:bg-slate-800/50 transition-colors">
       <div className="flex-1">
@@ -277,7 +284,11 @@ function ComplaintItem({ complaint }) {
           {new Date(complaint.createdAt).toLocaleDateString()}
         </p>
       </div>
-      <button className="text-slate-400 hover:text-white transition-colors">
+      <button
+        onClick={onView}
+        className="text-slate-400 hover:text-white transition-colors"
+        aria-label="View complaint details"
+      >
         <ViewIcon className="w-4 h-4" />
       </button>
     </div>

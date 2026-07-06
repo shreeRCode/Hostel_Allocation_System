@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import AppLayout from "../../components/layout/AppLayout";
 import Card from "../../components/common/Card";
+import Table from "../../components/common/Table";
 import { apiRequest } from "../../services/apiClient";
+import { AllocationsIcon } from "../../components/common/Icons";
 
 export default function AdminAllocationsPage() {
   const [allocs, setAllocs] = useState([]);
@@ -39,6 +41,25 @@ export default function AdminAllocationsPage() {
     fetchAllocations();
   }, []);
 
+  const columns = [
+    {
+      key: "student",
+      label: "Student",
+      render: (_, item) => item.student?.name || "N/A",
+    },
+    {
+      key: "hostel",
+      label: "Hostel",
+      render: (_, item) => item.room?.hostel?.name || "N/A",
+    },
+    {
+      key: "room",
+      label: "Room",
+      render: (_, item) => item.room?.roomNumber || "N/A",
+    },
+    { key: "allocatedAt", label: "Allocated At", type: "datetime" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-5">
@@ -67,36 +88,13 @@ export default function AdminAllocationsPage() {
           </div>
         )}
 
-        <Card title="Allocations">
-          {loading ? (
-            <p className="text-sm text-slate-400">Loading...</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse text-sm">
-                <thead className="bg-slate-900 text-xs uppercase text-slate-400">
-                  <tr>
-                    <th className="px-3 py-2">Student</th>
-                    <th className="px-3 py-2">Hostel</th>
-                    <th className="px-3 py-2">Room</th>
-                    <th className="px-3 py-2">Allocated At</th>
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-slate-800">
-                  {allocs.map((a) => (
-                    <tr key={a.id}>
-                      <td className="px-3 py-2">{a.student?.name}</td>
-                      <td className="px-3 py-2">{a.room?.hostel?.name}</td>
-                      <td className="px-3 py-2">{a.room?.roomNumber}</td>
-                      <td className="px-3 py-2">
-                        {new Date(a.allocatedAt).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+        <Card title="Allocations" icon={<AllocationsIcon className="w-5 h-5" />}>
+          <Table
+            data={allocs}
+            columns={columns}
+            loading={loading}
+            emptyMessage="No allocations yet. Run the allocation algorithm to assign rooms."
+          />
         </Card>
       </div>
     </AppLayout>

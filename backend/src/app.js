@@ -17,9 +17,17 @@ const allocationRoutes = require("./routes/allocation");
 const app = express();
 
 // Middleware
+// Allow any localhost port in dev (Vite picks the next free port if 5173 is
+// taken, e.g. 5174/5175) plus the deployed frontend origin in production.
+const LOCALHOST_ORIGIN = /^http:\/\/localhost:\d+$/;
 app.use(
   cors({
-    origin: ["http://localhost:5173", process.env.FRONTEND_URL],
+    origin: (origin, callback) => {
+      if (!origin || LOCALHOST_ORIGIN.test(origin) || origin === process.env.FRONTEND_URL) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );

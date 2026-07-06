@@ -25,7 +25,17 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
           user?.role === "ADMIN" ? "/complaints" : "/complaints/my";
 
         const data = await apiRequest(endpoint, { auth: true });
-        setComplaintCount(data?.complaints?.length || 0);
+        const complaints = data?.complaints || [];
+
+        // Admin: total complaints for their hostel.
+        // Student: complaints marked RESOLVED but not yet confirmed —
+        // this is the "you need to check this" signal, not just raw volume.
+        const count =
+          user?.role === "ADMIN"
+            ? complaints.length
+            : complaints.filter((c) => c.status === "RESOLVED").length;
+
+        setComplaintCount(count);
       } catch {
         console.error("Failed to fetch complaints");
       }

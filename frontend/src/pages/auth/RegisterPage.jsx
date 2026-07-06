@@ -156,6 +156,11 @@ export default function RegisterPage() {
                   </>
                 )}
               </select>
+              {!form.gender && (
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Select your gender first to see available hostels.
+                </p>
+              )}
             </div>
           </div>
 

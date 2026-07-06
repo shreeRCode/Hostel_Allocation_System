@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+
+const PAGE_TITLES = {
+  "/admin": "Dashboard",
+  "/admin/allocations": "Allocations",
+  "/admin/rooms": "Rooms",
+  "/admin/complaints": "Complaints",
+  "/student": "Dashboard",
+  "/student/complaints": "My Complaints",
+};
 
 export default function Topbar({ onToggleSidebar }) {
   const { logout } = useAuth();
+  const location = useLocation();
+  const pageTitle = PAGE_TITLES[location.pathname] || "";
   const [time, setTime] = useState("");
 
   useEffect(() => {
@@ -34,8 +46,15 @@ export default function Topbar({ onToggleSidebar }) {
           ☰
         </button>
 
+        {pageTitle && (
+          <h2 className="text-sm font-semibold text-white hidden sm:block">
+            {pageTitle}
+          </h2>
+        )}
+
         <div className="text-sm text-slate-400">
-          Current Time: <span className="text-white">{time}</span>
+          <span className="hidden sm:inline">Current Time: </span>
+          <span className="text-white">{time}</span>
         </div>
       </div>
 

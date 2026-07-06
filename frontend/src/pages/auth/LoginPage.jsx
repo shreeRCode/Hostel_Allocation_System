@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { loginAdmin, loginStudent } from "../../services/authService";
 import { ROLES } from "../../utils/constants";
-import { UserIcon, LogoutIcon } from "../../components/common/Icons";
+import { UserIcon, LogoutIcon, EyeIcon, EyeOffIcon } from "../../components/common/Icons";
 
 export default function LoginPage() {
   const [role, setRole] = useState(ROLES.STUDENT);
@@ -146,8 +146,13 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-slate-400 hover:text-slate-300"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  {showPassword ? (
+                    <EyeOffIcon className="w-4 h-4" />
+                  ) : (
+                    <EyeIcon className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>

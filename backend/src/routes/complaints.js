@@ -79,6 +79,38 @@ router.post("/", authMiddleware, requireStudent, async (req, res) => {
 });
 
 // ===============================================
+//  STUDENT: CONFIRM A RESOLVED COMPLAINT IS ACTUALLY FIXED
+// ===============================================
+router.put("/:id/confirm", authMiddleware, requireStudent, async (req, res) => {
+  try {
+    const complaintId = parseInt(req.params.id);
+
+    const complaint = await prisma.complaint.findUnique({
+      where: { id: complaintId },
+    });
+
+    if (!complaint || complaint.studentId !== req.user.id) {
+      return res.status(403).json({ error: "Access denied." });
+    }
+
+    if (complaint.status !== "RESOLVED") {
+      return res
+        .status(400)
+        .json({ error: "Only resolved complaints can be confirmed." });
+    }
+
+    const updated = await prisma.complaint.update({
+      where: { id: complaintId },
+      data: { status: "CLOSED" },
+    });
+
+    res.json({ message: "Complaint confirmed and closed.", complaint: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===============================================
 //  ADMIN: GET ALL COMPLAINTS FOR THEIR HOSTEL ONLY
 // ===============================================
 router.get("/", authMiddleware, requireAdmin, async (req, res) => {
@@ -125,9 +157,16 @@ router.get("/", authMiddleware, requireAdmin, async (req, res) => {
 // ===============================================
 //  ADMIN: UPDATE COMPLAINT STATUS
 // ===============================================
+const VALID_STATUSES = ["PENDING", "IN_PROGRESS", "RESOLVED", "ESCALATED", "CLOSED"];
+
 router.put("/:id/status", authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
+
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ error: "Invalid status value." });
+    }
+
     const complaintId = parseInt(req.params.id);
     const adminHostelId = req.user.hostelId;
 

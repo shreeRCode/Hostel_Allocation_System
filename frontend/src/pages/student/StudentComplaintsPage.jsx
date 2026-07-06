@@ -6,7 +6,7 @@ import Table from "../../components/common/Table";
 import Modal from "../../components/common/Modal";
 import { apiRequest } from "../../services/apiClient";
 import { COMPLAINT_CATEGORIES } from "../../utils/constants";
-import { ComplaintsIcon, PlusIcon, ViewIcon, EditIcon, RefreshIcon } from "../../components/common/Icons";
+import { ComplaintsIcon, PlusIcon, ViewIcon, EditIcon, RefreshIcon, CheckIcon } from "../../components/common/Icons";
 
 export default function StudentComplaintsPage() {
   const [form, setForm] = useState({
@@ -79,11 +79,24 @@ export default function StudentComplaintsPage() {
     fetchComplaints();
   };
 
+  const confirmFixed = async (id) => {
+    try {
+      await apiRequest(`/complaints/${id}/confirm`, { method: "PUT", auth: true });
+      setSelectedComplaint(null);
+      await fetchComplaints();
+    } catch (err) {
+      alert(err.message || "Failed to confirm complaint");
+    }
+  };
+
   const complaintStats = {
     total: complaints.length,
     pending: complaints.filter(c => c.status === "PENDING").length,
     inProgress: complaints.filter(c => c.status === "IN_PROGRESS").length,
-    resolved: complaints.filter(c => c.status === "RESOLVED").length,
+    // "Fixed" covers both RESOLVED (admin says done) and CLOSED (you confirmed it).
+    fixed: complaints.filter(c => c.status === "RESOLVED" || c.status === "CLOSED").length,
+    // Admin marked it fixed, but you haven't confirmed yet — needs your attention.
+    awaitingConfirmation: complaints.filter(c => c.status === "RESOLVED").length,
     escalated: complaints.filter(c => c.status === "ESCALATED").length
   };
 
@@ -119,13 +132,24 @@ export default function StudentComplaintsPage() {
       label: 'Actions',
       sortable: false,
       render: (_, item) => (
-        <button
-          onClick={() => setSelectedComplaint(item)}
-          className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors"
-        >
-          <ViewIcon className="w-4 h-4" />
-          View
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSelectedComplaint(item)}
+            className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors"
+          >
+            <ViewIcon className="w-4 h-4" />
+            View
+          </button>
+          {item.status === "RESOLVED" && (
+            <button
+              onClick={() => confirmFixed(item.id)}
+              className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors"
+            >
+              <CheckIcon className="w-4 h-4" />
+              Confirm Fixed
+            </button>
+          )}
+        </div>
       )
     }
   ];
@@ -163,7 +187,7 @@ export default function StudentComplaintsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <StatsCard
             title="Total"
             value={complaintStats.total}
@@ -182,8 +206,15 @@ export default function StudentComplaintsPage() {
             icon={<RefreshIcon className="w-5 h-5" />}
           />
           <StatsCard
-            title="Resolved"
-            value={complaintStats.resolved}
+            title="Awaiting Confirmation"
+            value={complaintStats.awaitingConfirmation}
+            change={complaintStats.awaitingConfirmation > 0 ? "Needs your action" : undefined}
+            trend={complaintStats.awaitingConfirmation > 0 ? "down" : "neutral"}
+            icon={<CheckIcon className="w-5 h-5" />}
+          />
+          <StatsCard
+            title="Fixed"
+            value={complaintStats.fixed}
             trend="up"
             icon={<ViewIcon className="w-5 h-5" />}
           />
@@ -357,13 +388,22 @@ export default function StudentComplaintsPage() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setSelectedComplaint(null)}
                 className="btn-secondary"
               >
-                Close
+                Dismiss
               </button>
+              {selectedComplaint.status === "RESOLVED" && (
+                <button
+                  onClick={() => confirmFixed(selectedComplaint.id)}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <CheckIcon className="w-4 h-4" />
+                  Confirm Fixed
+                </button>
+              )}
             </div>
           </div>
         )}

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import AppLayout from "../../components/layout/AppLayout";
 import Card from "../../components/common/Card";
+import Table from "../../components/common/Table";
 import { apiRequest } from "../../services/apiClient";
+import { HostelsIcon } from "../../components/common/Icons";
 
 export default function AdminRoomsPage() {
   const [rooms, setRooms] = useState([]);
@@ -26,6 +28,18 @@ export default function AdminRoomsPage() {
     fetchRooms();
   }, []);
 
+  const columns = [
+    { key: "roomNumber", label: "Room" },
+    { key: "capacity", label: "Capacity" },
+    { key: "occupiedCount", label: "Occupied" },
+    {
+      key: "available",
+      label: "Available",
+      sortable: false,
+      render: (_, item) => item.capacity - item.occupiedCount,
+    },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-5">
@@ -42,34 +56,13 @@ export default function AdminRoomsPage() {
           </div>
         )}
 
-        <Card title="Hostel Rooms">
-          {loading ? (
-            <p className="text-sm text-slate-400">Loading...</p>
-          ) : (
-            <table className="min-w-full text-sm">
-              <thead className="bg-slate-900 text-slate-400 text-xs">
-                <tr>
-                  <th className="px-3 py-2 text-left">Room</th>
-                  <th className="px-3 py-2 text-left">Capacity</th>
-                  <th className="px-3 py-2 text-left">Occupied</th>
-                  <th className="px-3 py-2 text-left">Available</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-800">
-                {rooms.map((room) => (
-                  <tr key={room.id}>
-                    <td className="px-3 py-2">{room.roomNumber}</td>
-                    <td className="px-3 py-2">{room.capacity}</td>
-                    <td className="px-3 py-2">{room.occupiedCount}</td>
-                    <td className="px-3 py-2">
-                      {room.capacity - room.occupiedCount}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+        <Card title="Hostel Rooms" icon={<HostelsIcon className="w-5 h-5" />}>
+          <Table
+            data={rooms}
+            columns={columns}
+            loading={loading}
+            emptyMessage="No rooms found."
+          />
         </Card>
       </div>
     </AppLayout>
