@@ -18,12 +18,17 @@ model Student {
   branch          String
   year            Int
   gender          String
+  // preferredHostel stores the Hostel name and is now a real foreign key into
+  // Hostel.name (referential integrity — the value must match an existing
+  // hostel). Kept as a name (not id) so the frontend/allocation logic that
+  // works by hostel name continues to work unchanged.
   preferredHostel String?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
-  allocations     Allocation[]
-  complaints      Complaint[]
+  allocations       Allocation[]
+  complaints        Complaint[]
+  preferredHostelRef Hostel?    @relation("StudentPreferredHostel", fields: [preferredHostel], references: [name])
 }
 
 //
@@ -31,7 +36,7 @@ model Student {
 //
 model Hostel {
   id             Int          @id @default(autoincrement())
-  name           String
+  name           String       @unique
   genderAllowed  String
   capacity       Int
   createdAt      DateTime     @default(now())
@@ -39,6 +44,7 @@ model Hostel {
   rooms          Room[]
   complaints     Complaint[]
   admins         Admin[]
+  preferringStudents Student[] @relation("StudentPreferredHostel")
 }
 
 //
