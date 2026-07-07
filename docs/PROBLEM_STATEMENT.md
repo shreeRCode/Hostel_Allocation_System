@@ -48,8 +48,10 @@ these workflows and gives administrators a clear dashboard of their hostel.
   each containing a fixed set of fixed‑capacity rooms.
 - **Automated allocation** with a primary‑preference + fallback strategy and capacity
   checks (a student is never placed in a full room or a gender‑incompatible hostel).
-- **Complaint management**: create, list, and view complaints; admins update status
-  (Pending → In Progress → Resolved / Escalated).
+- **Complaint management**: create, list, and view complaints. Admins move a
+  complaint through Pending → In Progress → Resolved, or Escalated; once an
+  admin marks a complaint Resolved, the student who raised it confirms the fix
+  before it's considered Closed.
 - **SLA monitoring**: a background job periodically checks unresolved complaints and
   escalates any that have breached their category deadline.
 
@@ -84,7 +86,8 @@ these workflows and gives administrators a clear dashboard of their hostel.
 **Complaint Management**
 - FR7: An allocated student can raise a complaint with a title, category, severity, and description.
 - FR8: A student can view the status and history of their own complaints.
-- FR9: An admin can view all complaints **for their own hostel** and update their status.
+- FR9: An admin can view all complaints **for their own hostel** and move them through Pending → In Progress → Resolved, or Escalated.
+- FR9a: Once an admin marks a complaint **Resolved**, it is not yet Closed — the reporting student sees it flagged as "awaiting your confirmation" (sidebar badge + dashboard stat) and must confirm the fix before it moves to **Closed**. This keeps admins accountable for follow-through rather than just paperwork.
 
 **SLA & Escalation**
 - FR10: Each complaint category has a target resolution time (SLA).
