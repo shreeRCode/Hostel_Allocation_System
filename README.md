@@ -19,30 +19,33 @@ before it's considered closed — so a complaint can't be marked "done" without
 the person who reported it agreeing.
 
 ### Student
+
 - Register and get automatically allocated a room (gender + preference + fallback hostel + capacity aware)
 - View current room allocation
 - Raise, view, and search complaints with category/priority
 - Get notified (in-app) when a complaint is marked resolved, and confirm the fix
 
 ### Admin
+
 - Dashboard scoped to their own hostel: students, rooms, allocations, complaints
 - Run the allocation algorithm on demand
 - Move complaints through Pending → In Progress → Resolved / Escalated
 - SLA violations are auto-escalated and highlighted
 
 ### System
+
 - Rule-based allocation with primary-preference + gender-compatible fallback hostel
 - Background job checks every 5 minutes for SLA-breached complaints and auto-escalates them
 - JWT auth, bcrypt-hashed passwords, hostel-scoped role-based access control
 
 ## Tech Stack
 
-| | |
-|---|---|
-| **Frontend** | React 19, Vite, Tailwind CSS, React Router |
-| **Backend** | Node.js, Express, Prisma ORM |
-| **Database** | PostgreSQL (Neon) |
-| **Auth** | JWT + bcrypt |
+|                |                                                        |
+| -------------- | ------------------------------------------------------ |
+| **Frontend**   | React 19, Vite, Tailwind CSS, React Router             |
+| **Backend**    | Node.js, Express, Prisma ORM                           |
+| **Database**   | PostgreSQL (Neon)                                      |
+| **Auth**       | JWT + bcrypt                                           |
 | **Deployment** | Vercel (frontend) · Render (backend) · Neon (database) |
 
 ## Project Structure
@@ -75,6 +78,7 @@ docs/
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - A PostgreSQL database ([Neon](https://neon.tech) free tier works well)
 
@@ -129,10 +133,10 @@ npm run dev   # http://localhost:5173
 
 After seeding, these admin accounts exist (password for all: `Admin@123`):
 
-| Hostel | Email |
-|---|---|
+| Hostel        | Email              |
+| ------------- | ------------------ |
 | Alpha (Girls) | `alpha@hostel.com` |
-| Beta (Boys) | `beta@hostel.com` |
+| Beta (Boys)   | `beta@hostel.com`  |
 | Gamma (Co-ed) | `gamma@hostel.com` |
 
 Register a student account from the UI, then log in as the matching hostel
@@ -145,10 +149,6 @@ admin and click **Run Allocation** to assign them a room.
 - Admins only ever see data for their own hostel — enforced server-side, not just hidden in the UI.
 - CORS is restricted to the deployed frontend origin (plus any `localhost` port in development).
 
-## Status
+## Author
 
-Core flows (registration, automated allocation, complaints, SLA escalation,
-student confirmation) are implemented and tested end-to-end. Not yet built:
-admin room/hostel CRUD, room de-allocation/transfer, and email/SMS
-notifications — see [docs/PROBLEM_STATEMENT.md](docs/PROBLEM_STATEMENT.md#5-out-of-scope-current-version)
-for the full list of what's intentionally out of scope for this version.
+Built by [@shreeRCode](https://github.com/shreeRCode).
